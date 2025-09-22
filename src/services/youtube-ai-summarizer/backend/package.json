@@ -1,0 +1,32 @@
+{
+  "name": "youtube-ai-summarizer-microservice",
+  "version": "1.0.0",
+  "description": "YouTube AI Summarizer microservice backend for Desktop-Hub",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "youtube",
+    "transcript",
+    "ai",
+    "summarization",
+    "ollama",
+    "gemma",
+    "transformers",
+    "machine-learning"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "youtube-transcript": "^1.2.1",
+    "node-fetch": "^2.7.0",
+    "cheerio": "^1.0.0-rc.12",
+    "youtubei.js": "^9.4.0"
+  },
+  "devDependencies": {}
+}

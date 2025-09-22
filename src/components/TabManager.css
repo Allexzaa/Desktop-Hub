@@ -1,0 +1,22 @@
+/* Tab Manager Theme Variables */
+.tab-manager {
+  /* Light Theme */
+  --tab-content-bg: white;
+}
+
+.tab-manager[data-theme="dark"] {
+  --tab-content-bg: #1a1a1a;
+}
+
+.tab-manager {
+  height: 100vh;
+  display: flex;
+  flex-direction: row;
+}
+
+.tab-content-container {
+  flex: 1;
+  overflow: hidden;
+  background: var(--tab-content-bg);
+  transition: background-color 0.3s ease;
+}

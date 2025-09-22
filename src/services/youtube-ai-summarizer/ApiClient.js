@@ -85,6 +85,27 @@ class YouTubeAIApiClient {
         }
     }
 
+    async getChannelInfo(channelUrl) {
+        try {
+            const response = await fetch(`${this.baseUrl}/api/channel?url=${encodeURIComponent(channelUrl)}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (!data.success || !data.channelInfo) {
+                throw new Error('Failed to get channel information');
+            }
+            
+            return data.channelInfo;
+        } catch (error) {
+            console.error('Error fetching channel info:', error);
+            throw error;
+        }
+    }
+
     async checkServiceHealth() {
         try {
             const response = await fetch(`${this.baseUrl}/api/health`);

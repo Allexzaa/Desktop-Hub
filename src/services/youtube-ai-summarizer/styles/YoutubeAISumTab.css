@@ -1061,8 +1061,8 @@
   min-width: 0; /* Prevents flex item from overflowing */
 }
 
-/* Features Dropdown Box */
-.features-dropdown-box {
+/* Favorite Channels Box */
+.favorite-channels-box {
   width: 280px;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -1072,253 +1072,169 @@
   position: sticky;
   top: 24px;
   overflow: hidden;
+  position: relative;
 }
 
-.features-header {
+.channels-content {
+  padding: 16px;
+}
+
+
+
+/* Add Channel Section */
+.add-channel-section {
+  margin-bottom: 16px;
+}
+
+.channel-input-group {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  background: var(--bg-tertiary);
-  border-bottom: 1px solid var(--border-color);
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-.features-header h3 {
+.channel-url-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 13px;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.channel-url-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.channel-url-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.add-channel-btn {
+  padding: 10px 12px;
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  min-width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-channel-btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.add-channel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.empty-channels-text {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  font-style: italic;
   margin: 0;
-  font-size: 16px;
+  padding: 8px;
+}
+
+/* Channels List */
+.channels-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.channel-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.channel-item:hover {
+  background: var(--accent-light);
+  border-color: var(--accent-color);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.channel-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.channel-thumbnail {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.channel-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.channel-name {
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.features-toggle-btn {
+.channel-subscribers {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.remove-channel-btn {
   background: none;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  font-size: 14px;
-  padding: 4px 8px;
+  font-size: 12px;
+  padding: 4px 6px;
   border-radius: 4px;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
-.features-toggle-btn:hover {
-  background: var(--border-color);
-  color: var(--text-primary);
+.remove-channel-btn:hover {
+  background: var(--error-light);
+  color: var(--error-color);
 }
 
-.features-content {
-  padding: 16px;
-}
-
-.feature-item {
-  margin-bottom: 12px;
-}
-
-.feature-item:last-child {
-  margin-bottom: 0;
-}
-
-.feature-btn {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  color: var(--text-primary);
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.feature-btn:hover {
-  background: var(--accent-light);
-  border-color: var(--accent-color);
-  color: var(--accent-color);
-}
-
-.feature-btn.active {
-  background: var(--accent-color);
-  border-color: var(--accent-color);
-  color: white;
-}
-
-.dropdown-arrow {
-  font-size: 12px;
-  transition: transform 0.2s ease;
-}
-
-.dropdown-content {
-  margin-top: 8px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 12px;
-  animation: slideDown 0.2s ease-out;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Export Options */
-.dropdown-options {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.dropdown-option {
-  padding: 8px 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  color: var(--text-primary);
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
-}
-
-.dropdown-option:hover:not(:disabled) {
-  background: var(--accent-light);
-  border-color: var(--accent-color);
-  color: var(--accent-color);
-}
-
-.dropdown-option:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.export-settings {
-  border-top: 1px solid var(--border-color);
-  padding-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  cursor: pointer;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: 14px;
-  height: 14px;
-  margin: 0;
-}
-
-/* Analysis Stats */
-.analysis-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.stat-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 8px;
-  background: var(--bg-card);
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
-}
-
-.stat-label {
-  font-size: 12px;
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-.stat-value {
-  font-size: 12px;
-  color: var(--text-primary);
-  font-weight: 600;
-}
-
-.no-data {
-  text-align: center;
-  padding: 16px;
-  color: var(--text-muted);
-  font-size: 12px;
-  font-style: italic;
-}
-
-/* Tool Options */
-.tool-options {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.tool-btn {
-  padding: 8px 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  color: var(--text-primary);
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
-}
-
-.tool-btn:hover:not(:disabled) {
-  background: var(--success-light);
-  border-color: var(--success-color);
-  color: var(--success-color);
-}
-
-.tool-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Template Options */
-.template-options {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.template-btn {
-  padding: 8px 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  color: var(--text-primary);
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
-}
-
-.template-btn:hover {
-  background: var(--warning-color);
-  border-color: var(--warning-color);
-  color: white;
-}
-
-/* Show Features Button */
-.show-features-btn {
+/* Show Channels Button */
+.show-channels-btn {
   position: fixed;
   right: 24px;
   top: 50%;
@@ -1336,7 +1252,7 @@
   z-index: 100;
 }
 
-.show-features-btn:hover {
+.show-channels-btn:hover {
   background: var(--accent-hover);
   transform: translateY(-50%) scale(1.1);
 }
@@ -1413,43 +1329,53 @@
     justify-content: center;
   }
 
-  /* Features Box Mobile */
+  /* Favorite Channels Box Mobile */
   .content-layout {
     flex-direction: column;
     gap: 16px;
   }
 
-  .features-dropdown-box {
+  .favorite-channels-box {
     width: 100%;
     position: static;
-    order: -1; /* Show features box above main content on mobile */
+    order: -1; /* Show channels box above main content on mobile */
   }
 
-  .show-features-btn {
+  .show-channels-btn {
     right: 16px;
     width: 44px;
     height: 44px;
     font-size: 16px;
   }
 
-  .features-content {
+  .channels-content {
     padding: 12px;
   }
 
-  .feature-btn {
-    padding: 10px 12px;
-    font-size: 13px;
+  .channel-input-group {
+    flex-direction: column;
+    gap: 8px;
   }
 
-  .dropdown-content {
+  .add-channel-btn {
+    width: 100%;
+  }
+
+  .channel-item {
     padding: 10px;
   }
 
-  .dropdown-option,
-  .tool-btn,
-  .template-btn {
-    padding: 6px 10px;
-    font-size: 12px;
+  .channel-thumbnail {
+    width: 40px;
+    height: 40px;
+  }
+
+  .channel-name {
+    font-size: 13px;
+  }
+
+  .channel-subscribers {
+    font-size: 10px;
   }
 }
 

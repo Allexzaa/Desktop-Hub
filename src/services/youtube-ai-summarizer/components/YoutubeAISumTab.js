@@ -59,20 +59,12 @@ const YoutubeAISumTab = () => {
         }
     });
 
-    // State for dropdown features box
-    const [featuresDropdown, setFeaturesDropdown] = useState({
+    // State for favorite channels box
+    const [favoriteChannels, setFavoriteChannels] = useState({
         isVisible: true,
-        activeDropdown: null, // 'export', 'analysis', 'tools', 'templates'
-        exportOptions: {
-            format: 'markdown',
-            includeMetadata: true,
-            includeTimestamp: true
-        },
-        analysisOptions: {
-            showWordCount: true,
-            showReadingTime: true,
-            showSentiment: false
-        }
+        channels: [],
+        newChannelUrl: '',
+        isLoading: false
     });
 
     const apiClient = useRef(new YouTubeAIApiClient()).current;
@@ -81,6 +73,7 @@ const YoutubeAISumTab = () => {
         loadTaskHistory();
         loadTheme();
         loadSettings();
+        loadFavoriteChannels();
         checkServiceConnection(true);
         startConnectionMonitoring();
 
@@ -709,140 +702,168 @@ const YoutubeAISumTab = () => {
         }
     };
 
-    // Features dropdown functions
-    const toggleFeaturesDropdown = (dropdownType) => {
-        setFeaturesDropdown(prev => ({
-            ...prev,
-            activeDropdown: prev.activeDropdown === dropdownType ? null : dropdownType
-        }));
-    };
-
-    const toggleFeaturesBox = () => {
-        setFeaturesDropdown(prev => ({
+    // Favorite channels functions
+    const toggleFavoriteChannelsBox = () => {
+        setFavoriteChannels(prev => ({
             ...prev,
             isVisible: !prev.isVisible
         }));
     };
 
-    const handleExport = (format) => {
-        let content = '';
-        let filename = '';
-        
-        switch (format) {
-            case 'markdown':
-                content = generateMarkdownExport();
-                filename = 'youtube-summary.md';
-                break;
-            case 'txt':
-                content = generateTextExport();
-                filename = 'youtube-summary.txt';
-                break;
-            case 'json':
-                content = generateJSONExport();
-                filename = 'youtube-summary.json';
-                break;
-            default:
-                return;
-        }
-
-        downloadFile(content, filename);
-        showStatus(`Exported as ${format.toUpperCase()}!`, 'success');
-    };
-
-    const generateMarkdownExport = () => {
-        let content = '';
-        
-        if (currentVideoInfo) {
-            content += `# ${currentVideoInfo.title}\n\n`;
-            content += `**Channel:** ${currentVideoInfo.channelName}\n`;
-            content += `**URL:** ${currentUrl}\n`;
-            if (featuresDropdown.exportOptions.includeTimestamp) {
-                content += `**Exported:** ${new Date().toLocaleString()}\n`;
+    const loadFavoriteChannels = () => {
+        try {
+            const saved = localStorage.getItem('youtube-ai-favorite-channels');
+            if (saved) {
+                const channels = JSON.parse(saved);
+                
+                // Clean up any channels with old placeholder URLs
+                const cleanedChannels = channels.map(channel => {
+                    if (channel.thumbnail && channel.thumbnail.includes('via.placeholder.com')) {
+                        console.log('Cleaning up old placeholder thumbnail for:', channel.name);
+                        return {
+                            ...channel,
+                            thumbnail: generateFallbackThumbnail(channel.name)
+                        };
+                    }
+                    return channel;
+                });
+                
+                setFavoriteChannels(prev => ({
+                    ...prev,
+                    channels: cleanedChannels
+                }));
+                
+                // Save the cleaned data back to localStorage
+                if (cleanedChannels.length !== channels.length || 
+                    cleanedChannels.some((ch, i) => ch.thumbnail !== channels[i]?.thumbnail)) {
+                    localStorage.setItem('youtube-ai-favorite-channels', JSON.stringify(cleanedChannels));
+                }
             }
-            content += '\n---\n\n';
+        } catch (error) {
+            console.error('Error loading favorite channels:', error);
         }
-
-        if (aiSummary) {
-            content += '## AI Summary\n\n';
-            content += aiSummary + '\n\n';
-        }
-
-        if (currentTranscript && featuresDropdown.exportOptions.includeMetadata) {
-            content += '## Full Transcript\n\n';
-            content += currentTranscript + '\n\n';
-        }
-
-        return content;
     };
 
-    const generateTextExport = () => {
-        let content = '';
+    const saveFavoriteChannels = (channels) => {
+        try {
+            localStorage.setItem('youtube-ai-favorite-channels', JSON.stringify(channels));
+            setFavoriteChannels(prev => ({
+                ...prev,
+                channels: channels
+            }));
+        } catch (error) {
+            console.error('Error saving favorite channels:', error);
+            showStatus('Failed to save favorite channels', 'error');
+        }
+    };
+
+    const extractChannelInfo = async (url) => {
+        try {
+            console.log(`Fetching real channel info for: ${url}`);
+            
+            // Use the API client to get real channel information
+            const channelInfo = await apiClient.getChannelInfo(url);
+            
+            // Add additional metadata
+            const enrichedChannelInfo = {
+                ...channelInfo,
+                addedAt: new Date().toISOString(),
+                // Ensure thumbnail has a fallback
+                thumbnail: channelInfo.thumbnail || generateFallbackThumbnail(channelInfo.name || 'Unknown Channel')
+            };
+
+            console.log('Successfully fetched channel info:', enrichedChannelInfo);
+            console.log('Channel thumbnail URL:', enrichedChannelInfo.thumbnail);
+            return enrichedChannelInfo;
+        } catch (error) {
+            console.error('Failed to extract channel information:', error);
+            throw new Error(`Failed to get channel information: ${error.message}`);
+        }
+    };
+
+    const addFavoriteChannel = async () => {
+        if (!favoriteChannels.newChannelUrl.trim()) {
+            showStatus('Please enter a YouTube channel URL', 'error');
+            return;
+        }
+
+        // Check if channel already exists
+        const existingChannel = favoriteChannels.channels.find(
+            channel => channel.url === favoriteChannels.newChannelUrl.trim()
+        );
+
+        if (existingChannel) {
+            showStatus('Channel already in favorites', 'warning');
+            return;
+        }
+
+        setFavoriteChannels(prev => ({ ...prev, isLoading: true }));
+
+        try {
+            const channelInfo = await extractChannelInfo(favoriteChannels.newChannelUrl.trim());
+            const updatedChannels = [...favoriteChannels.channels, channelInfo];
+            
+            saveFavoriteChannels(updatedChannels);
+            setFavoriteChannels(prev => ({
+                ...prev,
+                newChannelUrl: '',
+                isLoading: false
+            }));
+            
+            showStatus(`Added ${channelInfo.name} to favorites!`, 'success');
+        } catch (error) {
+            console.error('Error adding channel:', error);
+            showStatus(`Failed to add channel: ${error.message}`, 'error');
+            setFavoriteChannels(prev => ({ ...prev, isLoading: false }));
+        }
+    };
+
+    const removeFavoriteChannel = (channelId) => {
+        const updatedChannels = favoriteChannels.channels.filter(channel => channel.id !== channelId);
+        saveFavoriteChannels(updatedChannels);
+        showStatus('Channel removed from favorites', 'success');
+    };
+
+    const selectFavoriteChannel = (channel) => {
+        setCurrentUrl(channel.url);
+        showStatus(`Selected ${channel.name}`, 'success');
+    };
+
+    const clearChannelCache = () => {
+        localStorage.removeItem('youtube-ai-favorite-channels');
+        setFavoriteChannels(prev => ({
+            ...prev,
+            channels: []
+        }));
+        showStatus('Channel cache cleared', 'success');
+    };
+
+    const generateFallbackThumbnail = (name) => {
+        // Generate a data URL for a simple colored circle with initials
+        const initial = (name || 'CH').charAt(0).toUpperCase();
+        const colors = [
+            '#667eea', '#764ba2', '#f093fb', '#f5576c', 
+            '#4facfe', '#00f2fe', '#43e97b', '#38f9d7',
+            '#ffecd2', '#fcb69f', '#a8edea', '#fed6e3'
+        ];
         
-        if (currentVideoInfo) {
-            content += `${currentVideoInfo.title}\n`;
-            content += `Channel: ${currentVideoInfo.channelName}\n`;
-            content += `URL: ${currentUrl}\n`;
-            if (featuresDropdown.exportOptions.includeTimestamp) {
-                content += `Exported: ${new Date().toLocaleString()}\n`;
-            }
-            content += '\n' + '='.repeat(50) + '\n\n';
-        }
-
-        if (aiSummary) {
-            content += 'AI SUMMARY:\n\n';
-            content += aiSummary + '\n\n';
-        }
-
-        if (currentTranscript && featuresDropdown.exportOptions.includeMetadata) {
-            content += 'FULL TRANSCRIPT:\n\n';
-            content += currentTranscript + '\n\n';
-        }
-
-        return content;
-    };
-
-    const generateJSONExport = () => {
-        const data = {
-            videoInfo: currentVideoInfo,
-            url: currentUrl,
-            aiSummary: aiSummary,
-            transcript: featuresDropdown.exportOptions.includeMetadata ? currentTranscript : null,
-            exportedAt: featuresDropdown.exportOptions.includeTimestamp ? new Date().toISOString() : null,
-            settings: {
-                model: settings.models.aiSummary,
-                outputFormat: settings.summaryPreferences.outputFormat
-            }
-        };
+        // Use the first character to pick a consistent color
+        const colorIndex = initial.charCodeAt(0) % colors.length;
+        const bgColor = colors[colorIndex];
         
-        return JSON.stringify(data, null, 2);
+        // Create SVG data URL
+        const svg = `
+            <svg width="88" height="88" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="44" cy="44" r="44" fill="${bgColor}"/>
+                <text x="44" y="58" font-family="Arial, sans-serif" font-size="32" font-weight="bold" 
+                      text-anchor="middle" fill="white">${initial}</text>
+            </svg>
+        `;
+        
+        return `data:image/svg+xml;base64,${btoa(svg)}`;
     };
 
-    const downloadFile = (content, filename) => {
-        const blob = new Blob([content], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    };
 
-    const getAnalysisData = () => {
-        const data = {
-            wordCount: 0,
-            readingTime: 0,
-            sentiment: 'neutral'
-        };
-
-        if (aiSummary) {
-            data.wordCount = aiSummary.split(/\s+/).length;
-            data.readingTime = Math.ceil(data.wordCount / 200); // Average reading speed
-        }
-
-        return data;
-    };
 
     return (
         <div className={`youtube-ai-container theme-${currentTheme}`} data-theme={currentTheme}>
@@ -1696,232 +1717,117 @@ const YoutubeAISumTab = () => {
                     )}
                         </div>
 
-                        {/* Features Dropdown Box */}
-                        {featuresDropdown.isVisible && (
-                            <div className="features-dropdown-box">
-                                <div className="features-header">
-                                    <h3>🛠️ Features</h3>
-                                    <button 
-                                        className="features-toggle-btn"
-                                        onClick={toggleFeaturesBox}
-                                        title="Hide features panel"
-                                    >
-                                        ✕
-                                    </button>
-                                </div>
-
-                                <div className="features-content">
-                                    {/* Export Dropdown */}
-                                    <div className="feature-item">
-                                        <button 
-                                            className={`feature-btn ${featuresDropdown.activeDropdown === 'export' ? 'active' : ''}`}
-                                            onClick={() => toggleFeaturesDropdown('export')}
-                                        >
-                                            📤 Export
-                                            <span className="dropdown-arrow">
-                                                {featuresDropdown.activeDropdown === 'export' ? '▲' : '▼'}
-                                            </span>
-                                        </button>
-                                        
-                                        {featuresDropdown.activeDropdown === 'export' && (
-                                            <div className="dropdown-content">
-                                                <div className="dropdown-options">
-                                                    <button 
-                                                        className="dropdown-option"
-                                                        onClick={() => handleExport('markdown')}
-                                                        disabled={!aiSummary && !currentTranscript}
-                                                    >
-                                                        📝 Markdown (.md)
-                                                    </button>
-                                                    <button 
-                                                        className="dropdown-option"
-                                                        onClick={() => handleExport('txt')}
-                                                        disabled={!aiSummary && !currentTranscript}
-                                                    >
-                                                        📄 Text (.txt)
-                                                    </button>
-                                                    <button 
-                                                        className="dropdown-option"
-                                                        onClick={() => handleExport('json')}
-                                                        disabled={!aiSummary && !currentTranscript}
-                                                    >
-                                                        🔧 JSON (.json)
-                                                    </button>
-                                                </div>
-                                                
-                                                <div className="export-settings">
-                                                    <label className="checkbox-label">
-                                                        <input 
-                                                            type="checkbox"
-                                                            checked={featuresDropdown.exportOptions.includeMetadata}
-                                                            onChange={(e) => setFeaturesDropdown(prev => ({
-                                                                ...prev,
-                                                                exportOptions: {
-                                                                    ...prev.exportOptions,
-                                                                    includeMetadata: e.target.checked
-                                                                }
-                                                            }))}
-                                                        />
-                                                        Include transcript
-                                                    </label>
-                                                    <label className="checkbox-label">
-                                                        <input 
-                                                            type="checkbox"
-                                                            checked={featuresDropdown.exportOptions.includeTimestamp}
-                                                            onChange={(e) => setFeaturesDropdown(prev => ({
-                                                                ...prev,
-                                                                exportOptions: {
-                                                                    ...prev.exportOptions,
-                                                                    includeTimestamp: e.target.checked
-                                                                }
-                                                            }))}
-                                                        />
-                                                        Include timestamp
-                                                    </label>
-                                                </div>
+                        {/* Favorite Channels Box */}
+                        {favoriteChannels.isVisible && (
+                            <div className="favorite-channels-box">
+                                <div className="channels-content">
+                                    {/* Add Channel Input */}
+                                    <div className="add-channel-section">
+                                        <div className="channel-input-group">
+                                            <input
+                                                type="url"
+                                                placeholder="Paste YouTube channel URL here..."
+                                                value={favoriteChannels.newChannelUrl}
+                                                onChange={(e) => setFavoriteChannels(prev => ({
+                                                    ...prev,
+                                                    newChannelUrl: e.target.value
+                                                }))}
+                                                onKeyPress={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        addFavoriteChannel();
+                                                    }
+                                                }}
+                                                className="channel-url-input"
+                                                disabled={favoriteChannels.isLoading}
+                                            />
+                                            <button
+                                                onClick={addFavoriteChannel}
+                                                disabled={favoriteChannels.isLoading || !favoriteChannels.newChannelUrl.trim()}
+                                                className="add-channel-btn"
+                                            >
+                                                {favoriteChannels.isLoading ? '⏳' : '➕'}
+                                            </button>
+                                        </div>
+                                        {favoriteChannels.channels.length === 0 && (
+                                            <div className="empty-channels-section">
+                                                <p className="empty-channels-text">
+                                                    Add your favorite YouTube channels here for quick access
+                                                </p>
+                                                <button 
+                                                    onClick={clearChannelCache}
+                                                    className="clear-cache-btn"
+                                                    style={{
+                                                        fontSize: '11px',
+                                                        padding: '4px 8px',
+                                                        background: 'var(--error-light)',
+                                                        color: 'var(--error-color)',
+                                                        border: '1px solid var(--error-color)',
+                                                        borderRadius: '4px',
+                                                        cursor: 'pointer',
+                                                        marginTop: '8px'
+                                                    }}
+                                                >
+                                                    Clear Cache
+                                                </button>
                                             </div>
                                         )}
                                     </div>
 
-                                    {/* Analysis Dropdown */}
-                                    <div className="feature-item">
-                                        <button 
-                                            className={`feature-btn ${featuresDropdown.activeDropdown === 'analysis' ? 'active' : ''}`}
-                                            onClick={() => toggleFeaturesDropdown('analysis')}
-                                        >
-                                            📊 Analysis
-                                            <span className="dropdown-arrow">
-                                                {featuresDropdown.activeDropdown === 'analysis' ? '▲' : '▼'}
-                                            </span>
-                                        </button>
-                                        
-                                        {featuresDropdown.activeDropdown === 'analysis' && (
-                                            <div className="dropdown-content">
-                                                {aiSummary ? (
-                                                    <div className="analysis-stats">
-                                                        <div className="stat-item">
-                                                            <span className="stat-label">📝 Words:</span>
-                                                            <span className="stat-value">{getAnalysisData().wordCount}</span>
-                                                        </div>
-                                                        <div className="stat-item">
-                                                            <span className="stat-label">⏱️ Reading time:</span>
-                                                            <span className="stat-value">{getAnalysisData().readingTime} min</span>
-                                                        </div>
-                                                        <div className="stat-item">
-                                                            <span className="stat-label">📈 Characters:</span>
-                                                            <span className="stat-value">{aiSummary.length}</span>
-                                                        </div>
-                                                        {currentTranscript && (
-                                                            <div className="stat-item">
-                                                                <span className="stat-label">📜 Original length:</span>
-                                                                <span className="stat-value">{Math.round(currentTranscript.length / 1000)}k chars</span>
+                                    {/* Channels List */}
+                                    {favoriteChannels.channels.length > 0 && (
+                                        <div className="channels-list">
+                                            {favoriteChannels.channels.map((channel) => (
+                                                <div key={channel.id} className="channel-item">
+                                                    <div 
+                                                        className="channel-info"
+                                                        onClick={() => selectFavoriteChannel(channel)}
+                                                    >
+                                                        <img 
+                                                            src={channel.thumbnail} 
+                                                            alt={channel.name}
+                                                            className="channel-thumbnail"
+                                                            onError={(e) => {
+                                                                console.log('Image failed to load:', e.target.src);
+                                                                const fallbackUrl = generateFallbackThumbnail(channel.name);
+                                                                console.log('Using fallback:', fallbackUrl);
+                                                                e.target.src = fallbackUrl;
+                                                            }}
+                                                        />
+                                                        <div className="channel-details">
+                                                            <div className="channel-name" title={channel.name}>
+                                                                {channel.name}
                                                             </div>
-                                                        )}
+                                                            <div className="channel-subscribers">
+                                                                {channel.subscriberCount}
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                ) : (
-                                                    <div className="no-data">
-                                                        <p>Generate a summary to see analysis</p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Tools Dropdown */}
-                                    <div className="feature-item">
-                                        <button 
-                                            className={`feature-btn ${featuresDropdown.activeDropdown === 'tools' ? 'active' : ''}`}
-                                            onClick={() => toggleFeaturesDropdown('tools')}
-                                        >
-                                            🔧 Tools
-                                            <span className="dropdown-arrow">
-                                                {featuresDropdown.activeDropdown === 'tools' ? '▲' : '▼'}
-                                            </span>
-                                        </button>
-                                        
-                                        {featuresDropdown.activeDropdown === 'tools' && (
-                                            <div className="dropdown-content">
-                                                <div className="tool-options">
-                                                    <button 
-                                                        className="tool-btn"
-                                                        onClick={() => copyToClipboard('ai-summary')}
-                                                        disabled={!aiSummary}
-                                                    >
-                                                        📋 Copy Summary
-                                                    </button>
-                                                    <button 
-                                                        className="tool-btn"
-                                                        onClick={() => copyToClipboard('transcript')}
-                                                        disabled={!currentTranscript}
-                                                    >
-                                                        📋 Copy Transcript
-                                                    </button>
-                                                    <button 
-                                                        className="tool-btn"
-                                                        onClick={() => {
-                                                            setCurrentUrl('');
-                                                            setCurrentTranscript('');
-                                                            setAiSummary('');
-                                                            setCurrentVideoInfo(null);
-                                                            showStatus('Workspace cleared!', 'success');
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            removeFavoriteChannel(channel.id);
                                                         }}
+                                                        className="remove-channel-btn"
+                                                        title="Remove channel"
                                                     >
-                                                        🗑️ Clear All
+                                                        ✕
                                                     </button>
                                                 </div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Templates Dropdown */}
-                                    <div className="feature-item">
-                                        <button 
-                                            className={`feature-btn ${featuresDropdown.activeDropdown === 'templates' ? 'active' : ''}`}
-                                            onClick={() => toggleFeaturesDropdown('templates')}
-                                        >
-                                            📋 Templates
-                                            <span className="dropdown-arrow">
-                                                {featuresDropdown.activeDropdown === 'templates' ? '▲' : '▼'}
-                                            </span>
-                                        </button>
-                                        
-                                        {featuresDropdown.activeDropdown === 'templates' && (
-                                            <div className="dropdown-content">
-                                                <div className="template-options">
-                                                    <button 
-                                                        className="template-btn"
-                                                        onClick={() => setCurrentUrl('demo')}
-                                                    >
-                                                        🎬 Demo Video
-                                                    </button>
-                                                    <button 
-                                                        className="template-btn"
-                                                        onClick={() => setCurrentUrl('tech-talk')}
-                                                    >
-                                                        💻 Tech Talk Demo
-                                                    </button>
-                                                    <button 
-                                                        className="template-btn"
-                                                        onClick={() => setCurrentUrl('speech')}
-                                                    >
-                                                        🎤 Speech Demo
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
 
-                        {/* Show Features Button when hidden */}
-                        {!featuresDropdown.isVisible && (
+                        {/* Show Channels Button when hidden */}
+                        {!favoriteChannels.isVisible && (
                             <button 
-                                className="show-features-btn"
-                                onClick={toggleFeaturesBox}
-                                title="Show features panel"
+                                className="show-channels-btn"
+                                onClick={toggleFavoriteChannelsBox}
+                                title="Show favorite channels"
                             >
-                                🛠️
+                                ⭐
                             </button>
                         )}
                     </div>

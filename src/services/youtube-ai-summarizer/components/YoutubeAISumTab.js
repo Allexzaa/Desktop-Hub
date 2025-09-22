@@ -70,11 +70,11 @@ const YoutubeAISumTab = () => {
         selectedChannel: null, // Track which channel is selected for settings
         lastCheck: null,
         showSettings: false,
-        
+
         // NEW FEATURES: Auto-open settings for new channels
         isNewChannelSetup: false, // Track if this is a new channel being set up
         newlyAddedChannelId: null, // Track the ID of the newly added channel for highlighting
-        
+
         // Global monitor settings (used as defaults for new channels)
         monitorSettings: {
             checkIntervalValue: 1,
@@ -788,10 +788,10 @@ const YoutubeAISumTab = () => {
                 const newlyAddedChannel = prev.channels.find(ch => ch.id === result.channelInfo.id);
                 if (newlyAddedChannel) {
                     // Initialize default settings based on global monitor settings
-                    const channelWithSettings = newlyAddedChannel.settings ? 
-                        newlyAddedChannel : 
+                    const channelWithSettings = newlyAddedChannel.settings ?
+                        newlyAddedChannel :
                         { ...newlyAddedChannel, settings: initializeChannelSettings(newlyAddedChannel) };
-                    
+
                     return {
                         ...prev,
                         newChannelUrl: '',
@@ -846,7 +846,7 @@ const YoutubeAISumTab = () => {
         if (backendSettings.checkIntervalMinutes) {
             const minutes = backendSettings.checkIntervalMinutes;
             const { checkIntervalMinutes, ...otherSettings } = backendSettings;
-            
+
             // Convert to the most appropriate time unit for user display
             if (minutes >= 7 * 24 * 60 && minutes % (7 * 24 * 60) === 0) {
                 // Perfect weeks (10080 minutes = 1 week)
@@ -886,7 +886,7 @@ const YoutubeAISumTab = () => {
     const loadFavoriteChannels = async () => {
         try {
             const data = await apiClient.getFavoriteChannels();
-            
+
             // Ensure each channel has its settings properly loaded and converted
             const channelsWithSettings = (data.favorites || []).map(channel => {
                 if (channel.settings) {
@@ -902,12 +902,12 @@ const YoutubeAISumTab = () => {
                     settings: null // Keep as null if no settings exist
                 };
             });
-            
+
             setFavoriteChannels(prev => ({
                 ...prev,
                 channels: channelsWithSettings,
                 recentVideos: data.recentVideos || {},
-                selectedChannel: prev.selectedChannel 
+                selectedChannel: prev.selectedChannel
                     ? channelsWithSettings.find(ch => ch.id === prev.selectedChannel.id) || null
                     : null
             }));
@@ -968,7 +968,7 @@ const YoutubeAISumTab = () => {
                 ...prev,
                 monitorSettings: newSettings
             }));
-            
+
             const intervalText = `${newSettings.checkIntervalValue} ${newSettings.checkIntervalUnit}`;
             showStatus(`Global settings updated! Checking every ${intervalText}`, 'success');
         } catch (error) {
@@ -1022,24 +1022,24 @@ const YoutubeAISumTab = () => {
             };
 
             await apiClient.updateChannelSettings(channelId, backendSettings);
-            
+
             // Update the selected channel in local state
             setFavoriteChannels(prev => {
-                const updatedChannels = prev.channels.map(ch => 
-                    ch.id === channelId 
+                const updatedChannels = prev.channels.map(ch =>
+                    ch.id === channelId
                         ? { ...ch, settings: newSettings }
                         : ch
                 );
-                
+
                 return {
                     ...prev,
                     channels: updatedChannels,
-                    selectedChannel: prev.selectedChannel?.id === channelId 
+                    selectedChannel: prev.selectedChannel?.id === channelId
                         ? updatedChannels.find(ch => ch.id === channelId) // Use the updated channel data
                         : prev.selectedChannel
                 };
             });
-            
+
             const channelName = favoriteChannels.channels.find(ch => ch.id === channelId)?.name || 'Channel';
             const intervalText = `${newSettings.checkIntervalValue} ${newSettings.checkIntervalUnit}`;
             showStatus(`${channelName} settings updated! Checking every ${intervalText}`, 'success');
@@ -2007,12 +2007,12 @@ const YoutubeAISumTab = () => {
                                                         showStatus('Backend service is not connected!', 'error');
                                                         return;
                                                     }
-                                                    
+
                                                     if (favoriteChannels.channels.length === 0) {
                                                         showStatus('No channels to check!', 'warning');
                                                         return;
                                                     }
-                                                    
+
                                                     try {
                                                         await checkForNewVideos();
                                                     } catch (error) {
@@ -2026,8 +2026,8 @@ const YoutubeAISumTab = () => {
                                             </button>
                                             <button
                                                 className="btn-settings"
-                                                onClick={() => setFavoriteChannels(prev => ({ 
-                                                    ...prev, 
+                                                onClick={() => setFavoriteChannels(prev => ({
+                                                    ...prev,
                                                     showSettings: !prev.showSettings,
                                                     isNewChannelSetup: prev.showSettings ? false : prev.isNewChannelSetup // Clear flag when closing settings
                                                 }))}
@@ -2047,7 +2047,7 @@ const YoutubeAISumTab = () => {
                                         <div className="monitor-settings">
                                             <div className="settings-header">
                                                 <h5>
-                                                    {favoriteChannels.selectedChannel 
+                                                    {favoriteChannels.selectedChannel
                                                         ? favoriteChannels.isNewChannelSetup
                                                             ? `🎉 Welcome! Configure ${favoriteChannels.selectedChannel.name}`
                                                             : `Settings for ${favoriteChannels.selectedChannel.name}`
@@ -2073,7 +2073,7 @@ const YoutubeAISumTab = () => {
                                                 <div className="new-channel-welcome">
                                                     <div className="welcome-message">
                                                         <p>
-                                                            <strong>🚀 Channel added successfully!</strong> 
+                                                            <strong>🚀 Channel added successfully!</strong>
                                                             Configure how often to check for new videos and other preferences below.
                                                         </p>
                                                         <p className="welcome-tip">
@@ -2082,7 +2082,7 @@ const YoutubeAISumTab = () => {
                                                     </div>
                                                 </div>
                                             )}
-                                            
+
                                             <div className="settings-grid">
                                                 <div className="setting-item">
                                                     <label>Check Interval:</label>
@@ -2092,7 +2092,7 @@ const YoutubeAISumTab = () => {
                                                             min="1"
                                                             max="52"
                                                             value={
-                                                                favoriteChannels.selectedChannel?.settings?.checkIntervalValue ?? 
+                                                                favoriteChannels.selectedChannel?.settings?.checkIntervalValue ??
                                                                 favoriteChannels.monitorSettings.checkIntervalValue
                                                             }
                                                             onChange={(e) => {
@@ -2117,7 +2117,7 @@ const YoutubeAISumTab = () => {
                                                         />
                                                         <select
                                                             value={
-                                                                favoriteChannels.selectedChannel?.settings?.checkIntervalUnit ?? 
+                                                                favoriteChannels.selectedChannel?.settings?.checkIntervalUnit ??
                                                                 favoriteChannels.monitorSettings.checkIntervalUnit
                                                             }
                                                             onChange={(e) => {
@@ -2153,7 +2153,7 @@ const YoutubeAISumTab = () => {
                                                         min="1"
                                                         max="20"
                                                         value={
-                                                            favoriteChannels.selectedChannel?.settings?.maxVideosPerChannel ?? 
+                                                            favoriteChannels.selectedChannel?.settings?.maxVideosPerChannel ??
                                                             favoriteChannels.monitorSettings.maxVideosPerChannel
                                                         }
                                                         onChange={(e) => {
@@ -2251,15 +2251,14 @@ const YoutubeAISumTab = () => {
 
                                                 return (
                                                     <div key={channel.id} className={`channel-item ${favoriteChannels.newlyAddedChannelId === channel.id ? 'newly-added' : ''}`}>
-                                                        <div 
-                                                            className={`channel-card ${
-                                                                favoriteChannels.selectedChannel?.id === channel.id ? 'selected' : ''
-                                                            }`}
+                                                        <div
+                                                            className={`channel-card ${favoriteChannels.selectedChannel?.id === channel.id ? 'selected' : ''
+                                                                }`}
                                                             onClick={() => {
                                                                 setFavoriteChannels(prev => {
                                                                     if (prev.selectedChannel?.id === channel.id) {
-                                                                        return { 
-                                                                            ...prev, 
+                                                                        return {
+                                                                            ...prev,
                                                                             selectedChannel: null,
                                                                             isNewChannelSetup: false, // Clear new setup flag
                                                                             newlyAddedChannelId: null // Clear highlight
@@ -2279,8 +2278,8 @@ const YoutubeAISumTab = () => {
                                                                                 newlyAddedChannelId: null // Clear highlight
                                                                             };
                                                                         }
-                                                                        return { 
-                                                                            ...prev, 
+                                                                        return {
+                                                                            ...prev,
                                                                             selectedChannel: selectedChannel,
                                                                             isNewChannelSetup: false, // Clear new setup flag
                                                                             newlyAddedChannelId: null // Clear highlight
@@ -2339,7 +2338,7 @@ const YoutubeAISumTab = () => {
                                                                 >
                                                                     <div className="videos-handle-content">
                                                                         <span className="videos-text">
-                                                                            {channelVideos.length > 0 
+                                                                            {channelVideos.length > 0
                                                                                 ? `${channelVideos.length} video${channelVideos.length !== 1 ? 's' : ''}`
                                                                                 : 'No videos'
                                                                             }

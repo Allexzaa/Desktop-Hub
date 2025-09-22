@@ -27,6 +27,413 @@ try {
 const PORT = process.env.PORT || 8082;
 const OLLAMA_URL = 'http://localhost:11434';
 
+// Data storage paths
+const DATA_DIR = path.join(__dirname, 'data');
+const CHANNELS_FILE = path.join(DATA_DIR, 'favorite_channels.json');
+const VIDEOS_FILE = path.join(DATA_DIR, 'recent_videos.json');
+const SETTINGS_FILE = path.join(DATA_DIR, 'monitor_settings.json');
+
+// Ensure data directory exists
+if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+
+// Default monitoring settings
+const DEFAULT_SETTINGS = {
+    checkIntervalMinutes: 60, // Check every hour
+    videoLookbackHours: 24,   // Look for videos from last 24 hours (fixed)
+    maxVideosPerChannel: 5    // Keep last 5 videos per channel
+};
+
+// YouTube Channel Video Monitor Class
+class YouTubeChannelVideoMonitor {
+    constructor() {
+        this.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+        this.monitorInterval = null;
+        this.settings = this.loadSettings();
+        this.favoriteChannels = this.loadFavoriteChannels();
+        this.recentVideos = this.loadRecentVideos();
+    }
+
+    loadSettings() {
+        try {
+            if (fs.existsSync(SETTINGS_FILE)) {
+                const data = fs.readFileSync(SETTINGS_FILE, 'utf8');
+                return { ...DEFAULT_SETTINGS, ...JSON.parse(data) };
+            }
+        } catch (error) {
+            console.error('Error loading settings:', error.message);
+        }
+        return DEFAULT_SETTINGS;
+    }
+
+    saveSettings() {
+        try {
+            fs.writeFileSync(SETTINGS_FILE, JSON.stringify(this.settings, null, 2));
+        } catch (error) {
+            console.error('Error saving settings:', error.message);
+        }
+    }
+
+    loadFavoriteChannels() {
+        try {
+            if (fs.existsSync(CHANNELS_FILE)) {
+                const data = fs.readFileSync(CHANNELS_FILE, 'utf8');
+                return JSON.parse(data);
+            }
+        } catch (error) {
+            console.error('Error loading favorite channels:', error.message);
+        }
+        return [];
+    }
+
+    saveFavoriteChannels() {
+        try {
+            fs.writeFileSync(CHANNELS_FILE, JSON.stringify(this.favoriteChannels, null, 2));
+        } catch (error) {
+            console.error('Error saving favorite channels:', error.message);
+        }
+    }
+
+    loadRecentVideos() {
+        try {
+            if (fs.existsSync(VIDEOS_FILE)) {
+                const data = fs.readFileSync(VIDEOS_FILE, 'utf8');
+                return JSON.parse(data);
+            }
+        } catch (error) {
+            console.error('Error loading recent videos:', error.message);
+        }
+        return {};
+    }
+
+    saveRecentVideos() {
+        try {
+            fs.writeFileSync(VIDEOS_FILE, JSON.stringify(this.recentVideos, null, 2));
+        } catch (error) {
+            console.error('Error saving recent videos:', error.message);
+        }
+    }
+
+    addFavoriteChannel(channelInfo) {
+        // Check if channel already exists
+        const existingIndex = this.favoriteChannels.findIndex(ch => ch.id === channelInfo.id);
+
+        if (existingIndex >= 0) {
+            // Update existing channel info
+            this.favoriteChannels[existingIndex] = {
+                ...this.favoriteChannels[existingIndex],
+                ...channelInfo,
+                addedAt: this.favoriteChannels[existingIndex].addedAt // Keep original add time
+            };
+        } else {
+            // Add new channel
+            this.favoriteChannels.push({
+                ...channelInfo,
+                addedAt: new Date().toISOString()
+            });
+        }
+
+        this.saveFavoriteChannels();
+
+        // Initialize empty video list for new channel
+        if (!this.recentVideos[channelInfo.id]) {
+            this.recentVideos[channelInfo.id] = [];
+            this.saveRecentVideos();
+        }
+
+        return true;
+    }
+
+    removeFavoriteChannel(channelId) {
+        this.favoriteChannels = this.favoriteChannels.filter(ch => ch.id !== channelId);
+        delete this.recentVideos[channelId];
+
+        this.saveFavoriteChannels();
+        this.saveRecentVideos();
+
+        return true;
+    }
+
+    async fetchChannelVideos(channelUrl) {
+        try {
+            console.log(`Fetching videos for channel: ${channelUrl}`);
+            
+            // Ensure the URL ends with /videos
+            let videosUrl = channelUrl;
+            if (!videosUrl.endsWith('/videos')) {
+                videosUrl = videosUrl.replace(/\/$/, '') + '/videos';
+            }
+            
+            console.log(`Videos URL: ${videosUrl}`);
+            
+            const response = await fetch(videosUrl, {
+                headers: {
+                    'User-Agent': this.userAgent,
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.5',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'DNT': '1',
+                    'Connection': 'keep-alive',
+                    'Upgrade-Insecure-Requests': '1'
+                }
+            });
+
+            console.log(`Response status: ${response.status}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const html = await response.text();
+            console.log(`HTML length: ${html.length}`);
+            
+            const videos = this.parseChannelVideos(html);
+            console.log(`Parsed ${videos.length} videos`);
+            
+            return videos;
+        } catch (error) {
+            console.error(`Error fetching videos for ${channelUrl}:`, error.message);
+            return [];
+        }
+    }
+
+    parseChannelVideos(html) {
+        try {
+            const videos = [];
+            
+            console.log('Parsing channel videos HTML...');
+
+            // Extract ytInitialData
+            const ytDataMatch = html.match(/var ytInitialData = ({.+?});/);
+            if (!ytDataMatch) {
+                console.log('ytInitialData not found in videos page');
+                return videos;
+            }
+
+            console.log('Found ytInitialData, parsing...');
+            const ytData = JSON.parse(ytDataMatch[1]);
+
+            // Navigate to videos section
+            const tabs = ytData?.contents?.twoColumnBrowseResultsRenderer?.tabs;
+            console.log(`Found ${tabs?.length || 0} tabs`);
+            
+            if (!tabs) {
+                console.log('No tabs found in ytData');
+                return videos;
+            }
+
+            // Debug: log all tab titles
+            tabs.forEach((tab, index) => {
+                const title = tab.tabRenderer?.title;
+                const selected = tab.tabRenderer?.selected;
+                console.log(`Tab ${index}: ${title} (selected: ${selected})`);
+            });
+
+            // Find the Videos tab
+            const videosTab = tabs.find(tab =>
+                tab.tabRenderer?.title === 'Videos' ||
+                tab.tabRenderer?.selected === true
+            );
+
+            if (!videosTab) {
+                console.log('Videos tab not found');
+                return videos;
+            }
+
+            console.log('Found Videos tab, extracting content...');
+
+            // Extract video items
+            const videoItems = videosTab?.tabRenderer?.content?.richGridRenderer?.contents || [];
+            console.log(`Found ${videoItems.length} video items`);
+
+            for (const item of videoItems) {
+                const videoRenderer = item?.richItemRenderer?.content?.videoRenderer;
+                if (!videoRenderer) {
+                    console.log('No videoRenderer found in item');
+                    continue;
+                }
+
+                const videoId = videoRenderer.videoId;
+                const title = videoRenderer.title?.runs?.[0]?.text || videoRenderer.title?.simpleText;
+                const publishedText = videoRenderer.publishedTimeText?.simpleText;
+
+                console.log(`Video: ${title} (${videoId}) - ${publishedText}`);
+
+                if (videoId && title && publishedText) {
+                    const publishedTime = this.parsePublishedTime(publishedText);
+
+                    videos.push({
+                        id: videoId,
+                        title: title,
+                        url: `https://www.youtube.com/watch?v=${videoId}`,
+                        publishedText: publishedText,
+                        publishedTime: publishedTime,
+                        thumbnail: videoRenderer.thumbnail?.thumbnails?.[0]?.url
+                    });
+                } else {
+                    console.log(`Skipping video - missing data: videoId=${!!videoId}, title=${!!title}, publishedText=${!!publishedText}`);
+                }
+            }
+
+            console.log(`Successfully parsed ${videos.length} videos`);
+            return videos;
+        } catch (error) {
+            console.error('Error parsing channel videos:', error.message);
+            console.error('Stack trace:', error.stack);
+            return [];
+        }
+    }
+
+    parsePublishedTime(publishedText) {
+        try {
+            const now = new Date();
+            const text = publishedText.toLowerCase();
+
+            if (text.includes('minute')) {
+                const minutes = parseInt(text.match(/(\d+)/)?.[1] || '0');
+                return new Date(now.getTime() - minutes * 60 * 1000);
+            } else if (text.includes('hour')) {
+                const hours = parseInt(text.match(/(\d+)/)?.[1] || '0');
+                return new Date(now.getTime() - hours * 60 * 60 * 1000);
+            } else if (text.includes('day')) {
+                const days = parseInt(text.match(/(\d+)/)?.[1] || '0');
+                return new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+            } else if (text.includes('week')) {
+                const weeks = parseInt(text.match(/(\d+)/)?.[1] || '0');
+                return new Date(now.getTime() - weeks * 7 * 24 * 60 * 60 * 1000);
+            } else if (text.includes('month')) {
+                const months = parseInt(text.match(/(\d+)/)?.[1] || '0');
+                return new Date(now.getTime() - months * 30 * 24 * 60 * 60 * 1000);
+            }
+
+            return now; // Default to now if can't parse
+        } catch (error) {
+            return new Date();
+        }
+    }
+
+    async checkForNewVideos() {
+        console.log('Checking for new videos...');
+        const cutoffTime = new Date(Date.now() - this.settings.videoLookbackHours * 60 * 60 * 1000);
+        let newVideosFound = 0;
+
+        for (const channel of this.favoriteChannels) {
+            try {
+                console.log(`Checking channel: ${channel.name}`);
+                const videos = await this.fetchChannelVideos(channel.url);
+
+                // Filter for new videos within the lookback period
+                const newVideos = videos.filter(video => {
+                    const isNew = video.publishedTime > cutoffTime;
+                    const notAlreadyStored = !this.recentVideos[channel.id]?.some(stored => stored.id === video.id);
+                    return isNew && notAlreadyStored;
+                });
+
+                if (newVideos.length > 0) {
+                    console.log(`Found ${newVideos.length} new videos for ${channel.name}`);
+                    newVideosFound += newVideos.length;
+
+                    // Add new videos to the beginning of the array
+                    if (!this.recentVideos[channel.id]) {
+                        this.recentVideos[channel.id] = [];
+                    }
+
+                    this.recentVideos[channel.id] = [
+                        ...newVideos,
+                        ...this.recentVideos[channel.id]
+                    ].slice(0, this.settings.maxVideosPerChannel); // Keep only the latest N videos
+                }
+
+                // Always update with latest videos (even if not "new")
+                const allRecentVideos = videos.slice(0, this.settings.maxVideosPerChannel);
+                this.recentVideos[channel.id] = allRecentVideos;
+
+            } catch (error) {
+                console.error(`Error checking videos for ${channel.name}:`, error.message);
+            }
+        }
+
+        this.saveRecentVideos();
+        console.log(`Video check complete. Found ${newVideosFound} new videos total.`);
+        return newVideosFound;
+    }
+
+    startMonitoring() {
+        if (this.monitorInterval) {
+            clearInterval(this.monitorInterval);
+        }
+
+        console.log(`Starting video monitoring every ${this.settings.checkIntervalMinutes} minutes`);
+
+        // Run initial check
+        this.checkForNewVideos();
+
+        // Set up recurring checks
+        this.monitorInterval = setInterval(() => {
+            this.checkForNewVideos();
+        }, this.settings.checkIntervalMinutes * 60 * 1000);
+    }
+
+    stopMonitoring() {
+        if (this.monitorInterval) {
+            clearInterval(this.monitorInterval);
+            this.monitorInterval = null;
+            console.log('Video monitoring stopped');
+        }
+    }
+
+    updateSettings(newSettings) {
+        this.settings = { ...this.settings, ...newSettings };
+        this.saveSettings();
+
+        // Restart monitoring with new settings
+        if (this.monitorInterval) {
+            this.startMonitoring();
+        }
+    }
+
+    getFavoriteChannels() {
+        return this.favoriteChannels;
+    }
+
+    getRecentVideos() {
+        return this.recentVideos;
+    }
+
+    getSettings() {
+        return this.settings;
+    }
+
+    updateChannelSettings(channelId, settings) {
+        // Find the channel in favorite channels
+        const channelIndex = this.favoriteChannels.findIndex(ch => ch.id === channelId);
+        
+        if (channelIndex === -1) {
+            console.log(`Channel with ID ${channelId} not found`);
+            return false;
+        }
+
+        // Update the channel settings
+        this.favoriteChannels[channelIndex] = {
+            ...this.favoriteChannels[channelIndex],
+            settings: {
+                ...this.favoriteChannels[channelIndex].settings,
+                ...settings
+            }
+        };
+
+        // Save the updated channels
+        this.saveFavoriteChannels();
+        
+        console.log(`Updated settings for channel: ${this.favoriteChannels[channelIndex].name}`);
+        return true;
+    }
+}
+
+// Initialize the video monitor
+const videoMonitor = new YouTubeChannelVideoMonitor();
+
 // YouTube Channel Extractor Class
 class YouTubeChannelExtractor {
     constructor() {
@@ -35,16 +442,16 @@ class YouTubeChannelExtractor {
 
     async extractChannelInfo(channelUrl) {
         console.log(`Starting channel extraction for: ${channelUrl}`);
-        
+
         // Extract channel ID from URL
         const channelId = this.extractChannelId(channelUrl);
         console.log(`Extracted channel ID: ${channelId}`);
-        
+
         // Method 1: Try to get channel info from channel page
         const channelInfo = await this.fetchChannelFromPage(channelUrl);
         if (channelInfo && channelInfo.name !== 'Unknown Channel') {
             console.log('Channel info from page:', JSON.stringify(channelInfo, null, 2));
-            
+
             // If we got basic info but no subscriber count, try About page
             if (channelInfo.subscriberCount === 'Unknown') {
                 console.log('Subscriber count still unknown, trying About page...');
@@ -54,7 +461,7 @@ class YouTubeChannelExtractor {
                     console.log('Updated subscriber count from About page:', channelInfo.subscriberCount);
                 }
             }
-            
+
             return channelInfo;
         }
 
@@ -100,7 +507,7 @@ class YouTubeChannelExtractor {
         try {
             console.log('Fetching channel page...');
             console.log(`Fetching page: ${channelUrl}`);
-            
+
             const response = await fetch(channelUrl, {
                 headers: {
                     'User-Agent': this.userAgent,
@@ -144,7 +551,7 @@ class YouTubeChannelExtractor {
 
             console.log('Found ytInitialData');
             const ytData = JSON.parse(ytDataMatch[1]);
-            
+
             return this.extractFromYtInitialData(ytData, channelUrl);
         } catch (error) {
             console.error('Error parsing channel page:', error.message);
@@ -154,7 +561,7 @@ class YouTubeChannelExtractor {
 
     extractFromYtInitialData(ytData, channelUrl) {
         console.log('Analyzing ytInitialData structure...');
-        
+
         const result = {
             id: this.extractChannelId(channelUrl),
             name: 'Unknown Channel',
@@ -193,17 +600,17 @@ class YouTubeChannelExtractor {
             // Extract from header (where subscriber count usually is)
             if (hasHeader) {
                 const header = ytData.header.c4TabbedHeaderRenderer || ytData.header.pageHeaderRenderer;
-                
+
                 // Try to find subscriber count in header
                 if (header.subscriberCountText) {
                     result.subscriberCount = this.parseSubscriberCount(header.subscriberCountText);
                     console.log('Subscribers from header:', result.subscriberCount);
                 }
-                
+
                 // Check for verification badge
                 if (header.badges) {
-                    result.verified = header.badges.some(badge => 
-                        badge.metadataBadgeRenderer && 
+                    result.verified = header.badges.some(badge =>
+                        badge.metadataBadgeRenderer &&
                         badge.metadataBadgeRenderer.style === 'BADGE_STYLE_TYPE_VERIFIED'
                     );
                 }
@@ -223,7 +630,7 @@ class YouTubeChannelExtractor {
             // If still not found, try to search the entire ytData object for subscriber info
             if (result.subscriberCount === 'Unknown') {
                 console.log('Searching entire ytData for subscriber information...');
-                
+
                 // Let's debug what's actually in the ytData
                 console.log('=== DEBUGGING YTDATA STRUCTURE ===');
                 if (ytData.contents && ytData.contents.twoColumnBrowseResultsRenderer) {
@@ -238,7 +645,7 @@ class YouTubeChannelExtractor {
                         });
                     }
                 }
-                
+
                 // Try to find subscriber count in different locations
                 const subscriberInfo = this.deepSearchForSubscribers(ytData);
                 if (subscriberInfo) {
@@ -246,7 +653,7 @@ class YouTubeChannelExtractor {
                     console.log('Subscribers from deep search:', subscriberInfo);
                 } else {
                     console.log('Deep search did not find subscriber information');
-                    
+
                     // Try alternative extraction methods
                     console.log('Trying alternative extraction methods...');
                     const altSubscribers = this.extractSubscribersAlternative(ytData);
@@ -340,7 +747,7 @@ class YouTubeChannelExtractor {
         if (!subscriberData) return 'Unknown';
 
         let text = '';
-        
+
         if (typeof subscriberData === 'string') {
             text = subscriberData;
         } else if (subscriberData.simpleText) {
@@ -366,7 +773,7 @@ class YouTubeChannelExtractor {
 
         // Clean and parse the subscriber count
         text = text.toLowerCase().trim();
-        
+
         if (!text || !text.includes('subscriber')) {
             return 'Unknown';
         }
@@ -407,7 +814,7 @@ class YouTubeChannelExtractor {
 
     parseChannelPageFallback(html, channelUrl) {
         console.log('Using fallback parsing method...');
-        
+
         const result = {
             id: this.extractChannelId(channelUrl),
             name: 'Unknown Channel',
@@ -450,7 +857,7 @@ class YouTubeChannelExtractor {
         try {
             const aboutUrl = channelUrl.endsWith('/') ? `${channelUrl}about` : `${channelUrl}/about`;
             console.log(`Fetching About page: ${aboutUrl}`);
-            
+
             const response = await fetch(aboutUrl, {
                 headers: {
                     'User-Agent': this.userAgent,
@@ -550,6 +957,274 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
+    // Add favorite channel
+    if (pathname === '/api/favorites/add' && req.method === 'POST') {
+        try {
+            let body = '';
+            req.on('data', chunk => {
+                body += chunk.toString();
+            });
+
+            req.on('end', async () => {
+                try {
+                    const { channelUrl } = JSON.parse(body);
+
+                    if (!channelUrl) {
+                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'Channel URL is required' }));
+                        return;
+                    }
+
+                    // First extract channel info
+                    const channelExtractor = new YouTubeChannelExtractor();
+                    const channelInfo = await channelExtractor.extractChannelInfo(channelUrl);
+
+                    if (channelInfo.name === 'Unknown Channel') {
+                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'Could not extract channel information' }));
+                        return;
+                    }
+
+                    // Add to favorites
+                    videoMonitor.addFavoriteChannel(channelInfo);
+
+                    // Start monitoring if not already started
+                    if (!videoMonitor.monitorInterval) {
+                        videoMonitor.startMonitoring();
+                    }
+
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: true,
+                        message: 'Channel added to favorites',
+                        channelInfo: channelInfo
+                    }));
+
+                } catch (parseError) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Invalid JSON: ' + parseError.message }));
+                }
+            });
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: error.message }));
+        }
+        return;
+    }
+
+    // Remove favorite channel
+    if (pathname === '/api/favorites/remove' && req.method === 'POST') {
+        try {
+            let body = '';
+            req.on('data', chunk => {
+                body += chunk.toString();
+            });
+
+            req.on('end', () => {
+                try {
+                    const { channelId } = JSON.parse(body);
+
+                    if (!channelId) {
+                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'Channel ID is required' }));
+                        return;
+                    }
+
+                    videoMonitor.removeFavoriteChannel(channelId);
+
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: true,
+                        message: 'Channel removed from favorites'
+                    }));
+
+                } catch (parseError) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Invalid JSON: ' + parseError.message }));
+                }
+            });
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: error.message }));
+        }
+        return;
+    }
+
+    // Get favorite channels
+    if (pathname === '/api/favorites') {
+        try {
+            const favorites = videoMonitor.getFavoriteChannels();
+            const recentVideos = videoMonitor.getRecentVideos();
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: true,
+                favorites: favorites,
+                recentVideos: recentVideos
+            }));
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: error.message }));
+        }
+        return;
+    }
+
+    // Manual check for new videos
+    if (pathname === '/api/videos/check' && req.method === 'POST') {
+        try {
+            const newVideosCount = await videoMonitor.checkForNewVideos();
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: true,
+                message: `Check complete. Found ${newVideosCount} new videos.`,
+                newVideosCount: newVideosCount
+            }));
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: error.message }));
+        }
+        return;
+    }
+
+    // Get monitoring settings
+    if (pathname === '/api/monitor/settings') {
+        try {
+            const settings = videoMonitor.getSettings();
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: true,
+                settings: settings
+            }));
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: error.message }));
+        }
+        return;
+    }
+
+    // Update monitoring settings
+    if (pathname === '/api/monitor/settings' && req.method === 'POST') {
+        try {
+            let body = '';
+            req.on('data', chunk => {
+                body += chunk.toString();
+            });
+
+            req.on('end', () => {
+                try {
+                    const newSettings = JSON.parse(body);
+                    videoMonitor.updateSettings(newSettings);
+
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: true,
+                        message: 'Settings updated successfully',
+                        settings: videoMonitor.getSettings()
+                    }));
+
+                } catch (parseError) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Invalid JSON: ' + parseError.message }));
+                }
+            });
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: error.message }));
+        }
+        return;
+    }
+
+    // Start monitoring
+    if (pathname === '/api/monitor/start' && req.method === 'POST') {
+        try {
+            videoMonitor.startMonitoring();
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: true,
+                message: 'Video monitoring started'
+            }));
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: error.message }));
+        }
+        return;
+    }
+
+    // Stop monitoring
+    if (pathname === '/api/monitor/stop' && req.method === 'POST') {
+        try {
+            videoMonitor.stopMonitoring();
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: true,
+                message: 'Video monitoring stopped'
+            }));
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: error.message }));
+        }
+        return;
+    }
+
+    // Update channel settings
+    if (pathname === '/api/channel/settings' && req.method === 'POST') {
+        try {
+            let body = '';
+            req.on('data', chunk => {
+                body += chunk.toString();
+            });
+
+            req.on('end', () => {
+                try {
+                    const { channelId, settings } = JSON.parse(body);
+
+                    if (!channelId) {
+                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ 
+                            success: false, 
+                            error: 'Channel ID is required' 
+                        }));
+                        return;
+                    }
+
+                    // Update channel settings in the video monitor
+                    const success = videoMonitor.updateChannelSettings(channelId, settings);
+
+                    if (success) {
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({
+                            success: true,
+                            message: 'Channel settings updated successfully'
+                        }));
+                    } else {
+                        res.writeHead(404, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({
+                            success: false,
+                            error: 'Channel not found'
+                        }));
+                    }
+                } catch (parseError) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ 
+                        success: false, 
+                        error: 'Invalid JSON data' 
+                    }));
+                }
+            });
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+                success: false, 
+                error: error.message 
+            }));
+        }
+        return;
+    }
+
     // Serve static files
     let filePath = path.join(__dirname, pathname === '/' ? '/index.html' : pathname);
 
@@ -582,4 +1257,10 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
     console.log(`YouTube Transcript Summarizer Server running at http://localhost:${PORT}`);
     console.log('Open your browser and navigate to the above URL to use the application.');
+
+    // Start video monitoring if there are favorite channels
+    if (videoMonitor.getFavoriteChannels().length > 0) {
+        console.log('Starting video monitoring for favorite channels...');
+        videoMonitor.startMonitoring();
+    }
 });

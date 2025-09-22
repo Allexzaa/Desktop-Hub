@@ -106,6 +106,237 @@ class YouTubeAIApiClient {
         }
     }
 
+    // Favorite Channels Management
+    async addFavoriteChannel(channelUrl) {
+        try {
+            const response = await fetch(`${this.baseUrl}/api/favorites/add`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ channelUrl })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to add favorite channel');
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('Error adding favorite channel:', error);
+            throw error;
+        }
+    }
+
+    async removeFavoriteChannel(channelId) {
+        try {
+            const response = await fetch(`${this.baseUrl}/api/favorites/remove`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ channelId })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to remove favorite channel');
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('Error removing favorite channel:', error);
+            throw error;
+        }
+    }
+
+    async getFavoriteChannels() {
+        try {
+            const response = await fetch(`${this.baseUrl}/api/favorites`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error('Failed to get favorite channels');
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('Error fetching favorite channels:', error);
+            throw error;
+        }
+    }
+
+    // Video Monitoring
+    async checkForNewVideos() {
+        try {
+            const response = await fetch(`${this.baseUrl}/api/videos/check`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to check for new videos');
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('Error checking for new videos:', error);
+            throw error;
+        }
+    }
+
+    // Monitor Settings
+    async getMonitorSettings() {
+        try {
+            const response = await fetch(`${this.baseUrl}/api/monitor/settings`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error('Failed to get monitor settings');
+            }
+            
+            return data.settings;
+        } catch (error) {
+            console.error('Error fetching monitor settings:', error);
+            throw error;
+        }
+    }
+
+    async updateMonitorSettings(settings) {
+        try {
+            const response = await fetch(`${this.baseUrl}/api/monitor/settings`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(settings)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to update monitor settings');
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('Error updating monitor settings:', error);
+            throw error;
+        }
+    }
+
+    async updateChannelSettings(channelId, settings) {
+        try {
+            const response = await fetch(`${this.baseUrl}/api/channel/settings`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ channelId, settings })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to update channel settings');
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('Error updating channel settings:', error);
+            throw error;
+        }
+    }
+
+    async startMonitoring() {
+        try {
+            const response = await fetch(`${this.baseUrl}/api/monitor/start`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to start monitoring');
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('Error starting monitoring:', error);
+            throw error;
+        }
+    }
+
+    async stopMonitoring() {
+        try {
+            const response = await fetch(`${this.baseUrl}/api/monitor/stop`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to stop monitoring');
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('Error stopping monitoring:', error);
+            throw error;
+        }
+    }
+
     async checkServiceHealth() {
         try {
             const response = await fetch(`${this.baseUrl}/api/health`);

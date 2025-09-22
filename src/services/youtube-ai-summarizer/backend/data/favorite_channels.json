@@ -1,0 +1,99 @@
+[
+  {
+    "id": "ManuAGI",
+    "name": "ManuAGI - AutoGPT Tutorials",
+    "thumbnail": "https://yt3.googleusercontent.com/-wZmlo_VfgW9j5_8GdHA9EX_1r8WPXOTXh3L4de__Cv4GXJ7HYXaO9lZY2-0n8p4Lf2NuVrOZ-g=s900-c-k-c0x00ffffff-no-rj",
+    "subscriberCount": "33.7K subscribers",
+    "url": "https://www.youtube.com/@ManuAGI",
+    "verified": false,
+    "addedAt": "2025-09-22T13:43:53.447Z",
+    "settings": {
+      "autoSummarize": true,
+      "summaryModel": "gemma2:2b",
+      "notificationsEnabled": true,
+      "maxVideosToTrack": 5,
+      "checkIntervalMinutes": 1440,
+      "videoLookbackHours": 24,
+      "maxVideosPerChannel": 5,
+      "checkIntervalValue": 1,
+      "checkIntervalUnit": "days"
+    }
+  },
+  {
+    "id": "GregIsenberg",
+    "name": "Greg Isenberg",
+    "thumbnail": "https://yt3.googleusercontent.com/5wiiTxMamM0NnCmGOt0iJ6eoVRmFLNIGF-BEiTZ_AVqaS02YIxAsB-2XY6xwLCUWQfoENG1MHKo=s900-c-k-c0x00ffffff-no-rj",
+    "subscriberCount": "471.0K subscribers",
+    "url": "https://www.youtube.com/@GregIsenberg",
+    "verified": false,
+    "addedAt": "2025-09-22T15:33:29.334Z",
+    "settings": {
+      "checkIntervalMinutes": null,
+      "videoLookbackHours": 24,
+      "maxVideosPerChannel": 9,
+      "autoSummarize": false,
+      "summaryModel": "gemma2:9b",
+      "notificationsEnabled": false,
+      "maxVideosToTrack": 10,
+      "checkIntervalUnit": "weeks"
+    }
+  },
+  {
+    "id": "WorkWithRon",
+    "name": "Work With Ron",
+    "thumbnail": "https://yt3.googleusercontent.com/DiKaO8J8LX14ibO3grAdhbX_JraoXZ8FIhPEQBpBSwNyrXAxxGWOhemZaEFgWVUhWnwRoDla=s900-c-k-c0x00ffffff-no-rj",
+    "subscriberCount": "3.6K subscribers",
+    "url": "https://www.youtube.com/@WorkWithRon",
+    "verified": false,
+    "addedAt": "2025-09-22T15:46:52.688Z",
+    "settings": {
+      "checkIntervalMinutes": null,
+      "videoLookbackHours": 24,
+      "maxVideosPerChannel": 16
+    }
+  },
+  {
+    "id": "icanstudystudent",
+    "name": "iCanStudy",
+    "thumbnail": "https://yt3.googleusercontent.com/ytc/AIdro_kz7cKMtfg5QkI_VznexLmhsxOx8M_4DGMqKie65X5ARw=s900-c-k-c0x00ffffff-no-rj",
+    "subscriberCount": "60.3K subscribers",
+    "url": "https://www.youtube.com/@icanstudystudent",
+    "verified": false,
+    "addedAt": "2025-09-22T15:52:21.532Z",
+    "settings": {
+      "checkIntervalMinutes": 60480,
+      "videoLookbackHours": 24,
+      "maxVideosPerChannel": 9,
+      "checkIntervalValue": 6,
+      "checkIntervalUnit": "weeks"
+    }
+  },
+  {
+    "id": "ycombinator",
+    "name": "Y Combinator",
+    "thumbnail": "https://yt3.googleusercontent.com/dGyATx87Fp_s1nZvnupUFSnMqbAPZ6nqRby9Esk1m6YE41iBq-9Z8iGoIgHTCT9SiDBUpP2V=s900-c-k-c0x00ffffff-no-rj",
+    "subscriberCount": "308.0K subscribers",
+    "url": "https://www.youtube.com/@ycombinator",
+    "verified": false,
+    "addedAt": "2025-09-22T18:17:07.945Z",
+    "settings": {
+      "checkIntervalMinutes": 1440,
+      "videoLookbackHours": 24,
+      "maxVideosPerChannel": 3
+    }
+  },
+  {
+    "id": "Mark_Kashef",
+    "name": "Mark Kashef",
+    "thumbnail": "https://yt3.googleusercontent.com/6NBots32x_Rz98lBMEr1uoQ01fxJ8AS6hjscMs3RZlCsRsV9eenFMC-IN0E6kHDkpW7oIAAuuSI=s900-c-k-c0x00ffffff-no-rj",
+    "subscriberCount": "50.1K subscribers",
+    "url": "https://www.youtube.com/@Mark_Kashef",
+    "verified": false,
+    "addedAt": "2025-09-22T18:32:49.987Z",
+    "settings": {
+      "checkIntervalMinutes": 600,
+      "videoLookbackHours": 24,
+      "maxVideosPerChannel": 7
+    }
+  }
+]

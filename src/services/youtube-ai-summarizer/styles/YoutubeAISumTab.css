@@ -834,7 +834,7 @@
 }
 
 .video-info::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -1058,12 +1058,13 @@
 
 .main-content-area {
   flex: 1;
-  min-width: 0; /* Prevents flex item from overflowing */
+  min-width: 0;
+  /* Prevents flex item from overflowing */
 }
 
 /* Favorite Channels Box */
 .favorite-channels-box {
-  width: 280px;
+  width: 380px;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 12px;
@@ -1071,7 +1072,7 @@
   height: fit-content;
   position: sticky;
   top: 24px;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
 }
 
@@ -1152,11 +1153,10 @@
 
 /* Channels List */
 .channels-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 400px;
-  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
 }
 
 .channel-item {
@@ -1200,15 +1200,7 @@
   min-width: 0;
 }
 
-.channel-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+
 
 .channel-subscribers {
   font-size: 11px;
@@ -1338,7 +1330,8 @@
   .favorite-channels-box {
     width: 100%;
     position: static;
-    order: -1; /* Show channels box above main content on mobile */
+    order: -1;
+    /* Show channels box above main content on mobile */
   }
 
   .show-channels-btn {
@@ -1370,9 +1363,7 @@
     height: 40px;
   }
 
-  .channel-name {
-    font-size: 13px;
-  }
+
 
   .channel-subscribers {
     font-size: 10px;
@@ -1440,7 +1431,7 @@
 }
 
 .settings-panel-header::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 28px;
@@ -1498,7 +1489,7 @@
 }
 
 .settings-status::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -1564,7 +1555,7 @@
 }
 
 .setting-group h3::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -8px;
   left: 0;
@@ -1675,7 +1666,7 @@
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-image: none;
   background-position: right 12px center;
   background-repeat: no-repeat;
   background-size: 16px;
@@ -1861,7 +1852,7 @@
 }
 
 .api-config::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -1893,7 +1884,7 @@
 }
 
 .toggle-switch::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 2px;
   left: 2px;
@@ -1969,7 +1960,7 @@
 }
 
 .server-control-row::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -2182,7 +2173,7 @@
 }
 
 .connection-status-box::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -2238,7 +2229,7 @@
 }
 
 .settings-status-section::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -2326,13 +2317,13 @@
 }
 
 .settings-panel-header::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background: rgba(255, 255, 255, 0.05);
   opacity: 0.1;
 }
 
@@ -2403,7 +2394,7 @@
 }
 
 .settings-section h3::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 0;
@@ -2452,7 +2443,7 @@
 }
 
 .preferences-container::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -2620,7 +2611,7 @@
 }
 
 .settings-actions::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 20px;
@@ -2650,7 +2641,7 @@
 }
 
 .reset-btn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
@@ -2746,7 +2737,7 @@
 }
 
 .api-config-section::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -2849,7 +2840,7 @@
 }
 
 .server-control-row::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -3034,7 +3025,7 @@
 }
 
 .settings-status-section::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -3212,6 +3203,7 @@
 .sidebar-toggle-btn[aria-expanded="false"] svg {
   transform: rotate(0deg);
 }
+
 /* Server Actions */
 .server-actions {
   margin-top: 12px;
@@ -3322,7 +3314,9 @@
 
 .copy-command-btn svg {
   transition: all 0.2s ease;
-}/* Summary
+}
+
+/* Summary
 /* Task Content in Sidebar */
 .task-content {
   margin-bottom: 12px;
@@ -3335,3 +3329,2113 @@
   margin-top: 6px;
   line-height: 1.2;
 }
+
+/ * Channel Video Monitoring Styles */ .channel-monitor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.channel-monitor-header h4 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1em;
+}
+
+.monitor-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-check-videos,
+.btn-settings {
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8em;
+  transition: all 0.2s ease;
+}
+
+.btn-check-videos:hover,
+.btn-settings:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.btn-check-videos:disabled {
+  background: var(--text-muted);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.last-check {
+  font-size: 0.75em;
+  color: var(--text-muted);
+  text-align: right;
+  margin-bottom: 10px;
+}
+
+.monitor-settings {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 15px;
+}
+
+.monitor-settings h5 {
+  margin: 0 0 10px 0;
+  color: var(--text-primary);
+  font-size: 0.9em;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+.interval-setting {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.interval-value {
+  flex: 0 0 80px;
+  padding: 6px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.8em;
+}
+
+.interval-unit {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.8em;
+  cursor: pointer;
+}
+
+.interval-value:focus,
+.interval-unit:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.setting-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.setting-item label {
+  font-size: 0.8em;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.setting-item input {
+  padding: 6px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.8em;
+}
+
+.setting-item input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.channel-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8em;
+}
+
+.verified-badge {
+  color: #1da1f2;
+  font-size: 0.8em;
+}
+
+.new-videos-badge {
+  background: #ff4757;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.7em;
+  font-weight: 500;
+}
+
+/* Remove channel button styles */
+.remove-channel-btn {
+  background: none;
+  border: 1px solid var(--border-color);
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 0.8em;
+  transition: all 0.2s ease;
+  margin-left: auto;
+}
+
+.remove-channel-btn:hover {
+  background: #ff4757;
+  border-color: #ff4757;
+  color: white;
+}
+
+.channel-videos {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  margin-top: -1px;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    max-height: 500px;
+    transform: translateY(0);
+  }
+}
+
+.no-videos {
+  padding: 15px;
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.8em;
+}
+
+.videos-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.video-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.video-item:last-child {
+  border-bottom: none;
+}
+
+.video-item:hover {
+  background: var(--bg-card);
+}
+
+.video-item.new-video {
+  background: rgba(102, 126, 234, 0.05);
+  border-left: 3px solid var(--accent-color);
+}
+
+.video-thumbnail {
+  width: 60px;
+  height: 34px;
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.video-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbnail-placeholder {
+  width: 100%;
+  height: 100%;
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 1em;
+}
+
+.new-indicator {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: #ff4757;
+  color: white;
+  font-size: 0.6em;
+  padding: 1px 3px;
+  border-radius: 2px;
+  font-weight: bold;
+}
+
+.video-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.video-title {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 0.8em;
+  line-height: 1.2;
+  margin-bottom: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.video-meta {
+  font-size: 0.7em;
+  color: var(--text-muted);
+}
+
+.publish-time {
+  font-style: italic;
+}
+
+/* Enhanced channel item styles */
+.channel-item {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  background: var(--bg-card);
+}
+
+.channel-item:hover {
+  border-color: var(--accent-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+
+.channel-bottom-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-tertiary);
+}
+
+.btn-toggle-videos {
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.9em;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.btn-toggle-videos:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px) scale(1.05);
+}
+
+.video-count-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ff4757;
+  color: white;
+  font-size: 0.7em;
+  font-weight: bold;
+  padding: 2px 5px;
+  border-radius: 10px;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .video-thumbnail {
+    width: 50px;
+    height: 28px;
+  }
+
+  .video-item {
+    padding: 6px 10px;
+  }
+
+  .channel-main-info {
+    padding: 10px 10px 2px 10px;
+    gap: 10px;
+  }
+
+  .channel-bottom-actions {
+    padding: 6px 10px;
+  }
+
+  .btn-toggle-videos {
+    font-size: 0.8em;
+    width: 28px;
+    height: 28px;
+    padding: 6px;
+  }
+
+  .video-count-badge {
+    font-size: 0.6em;
+    padding: 1px 4px;
+    min-width: 14px;
+    height: 14px;
+  }
+
+
+
+  .channel-meta {
+    font-size: 0.75em;
+  }
+}
+
+/* Channels List Layout */
+.channels-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.channel-item {
+  display: block;
+  width: 100%;
+}
+
+/* Channel Selection Styles */
+.channel-card {
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: visible;
+  box-shadow: var(--shadow-sm);
+  min-height: 140px;
+  max-height: none;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.channel-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent-color);
+}
+
+.channel-card.selected {
+  border-color: var(--accent-color);
+  background: var(--accent-light);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+/* Main Channel Info - Maximum Specificity */
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-main-info {
+  display: flex !important;
+  align-items: flex-start !important;
+  padding: 16px 16px 2px 16px !important;
+  transition: background-color 0.2s ease !important;
+  flex: 1 !important;
+  min-height: 80px !important;
+}
+
+.channel-main-info:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.channel-card.selected .channel-main-info {
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.channel-thumbnail {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-color);
+  transition: border-color 0.2s ease;
+  margin-right: 12px;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.channel-card:hover .channel-thumbnail {
+  border-color: var(--accent-color);
+}
+
+.channel-details {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-right: 8px;
+}
+
+.channel-card .channel-details .channel-name {
+  font-weight: 600 !important;
+  font-size: 0.85em !important;
+  color: var(--text-primary) !important;
+  margin-bottom: 6px !important;
+  line-height: 1.3 !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  hyphens: auto !important;
+  display: block !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  white-space: normal !important;
+}
+
+.channel-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.channel-subscribers {
+  font-size: 0.8em;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.new-videos-badge {
+  background: var(--accent-color);
+  color: white;
+  font-size: 0.7em;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.remove-channel-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.8em;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.remove-channel-btn:hover {
+  background: var(--error-color);
+  color: white;
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Videos Handle - Bottom Section */
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-videos-handle {
+  border-top: 1px solid var(--border-color) !important;
+  background: var(--bg-tertiary) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-videos-handle .videos-toggle-btn {
+  width: 100% !important;
+  background: none !important;
+  border: none !important;
+  padding: 6px 16px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  color: var(--text-secondary) !important;
+}
+
+.videos-toggle-btn:hover {
+  background: rgba(102, 126, 234, 0.1);
+  color: var(--accent-color);
+}
+
+.videos-toggle-btn.expanded {
+  background: var(--accent-light);
+  color: var(--accent-color);
+}
+
+.videos-handle-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.videos-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.new-badge {
+  background: var(--accent-color);
+  color: white;
+  font-size: 0.75em;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.toggle-arrow {
+  font-size: 0.9em;
+  transition: transform 0.2s ease;
+}
+
+.videos-toggle-btn.expanded .toggle-arrow {
+  transform: rotate(180deg);
+}
+
+.verified-badge {
+  background: var(--success-color);
+  color: white;
+  font-size: 0.7em;
+  padding: 1px 4px;
+  border-radius: 50%;
+  font-weight: 600;
+  margin-left: 4px;
+  flex-shrink: 0;
+}
+
+.selected-indicator {
+  background: var(--accent-color);
+  color: white;
+  font-size: 0.7em;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 500;
+  margin-top: 4px;
+  align-self: flex-start;
+  flex-shrink: 0;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.settings-header h5 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.9em;
+}
+
+.clear-selection-btn {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.7em;
+  transition: all 0.2s ease;
+}
+
+.clear-selection-btn:hover {
+  background: var(--text-muted);
+  color: white;
+  border-color: var(--text-muted);
+}
+
+/* Instructions styling */
+.monitor-instructions {
+  background: rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 6px;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+}
+
+.monitor-instructions p {
+  margin: 0;
+  font-size: 0.8em;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.monitor-instructions strong {
+  color: var(--text-primary);
+}
+
+/* Channel Videos Dropdown */
+.channel-videos {
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.videos-list {
+  padding: 8px;
+}
+
+.video-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+}
+
+.video-item:hover {
+  background: var(--accent-light);
+  border-color: var(--accent-color);
+  transform: translateX(4px);
+}
+
+.video-item.new-video {
+  border-left: 4px solid var(--accent-color);
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.video-thumbnail {
+  position: relative;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.video-thumbnail img {
+  width: 60px;
+  height: 45px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.thumbnail-placeholder {
+  width: 60px;
+  height: 45px;
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2em;
+  color: var(--text-muted);
+}
+
+.new-indicator {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--accent-color);
+  color: white;
+  font-size: 0.6em;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.video-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.video-title {
+  font-weight: 500;
+  font-size: 0.85em;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.video-meta {
+  font-size: 0.75em;
+  color: var(--text-secondary);
+}
+
+.no-videos {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .channel-card {
+    min-height: 120px;
+  }
+
+  .channel-card .channel-main-info {
+    padding: 12px 12px 2px 12px !important;
+    min-height: 70px;
+  }
+
+  .channel-thumbnail {
+    width: 40px;
+    height: 40px;
+    margin-top: 2px;
+  }
+
+  .channel-card .channel-details .channel-name {
+    font-size: 0.8em !important;
+    line-height: 1.2 !important;
+  }
+
+  .channels-list {
+    gap: 8px;
+  }
+
+  .channel-subscribers {
+    font-size: 0.75em;
+  }
+
+  .selected-indicator {
+    font-size: 0.6em;
+    padding: 1px 4px;
+  }
+
+  .remove-channel-btn {
+    top: 6px;
+    right: 6px;
+    width: 18px;
+    height: 18px;
+    font-size: 0.7em;
+  }
+
+  .videos-handle-content {
+    font-size: 0.8em;
+  }
+
+  .video-item {
+    padding: 10px;
+  }
+
+  .video-thumbnail img,
+  .thumbnail-placeholder {
+    width: 50px;
+    height: 38px;
+  }
+
+  .video-title {
+    font-size: 0.8em;
+  }
+
+  .settings-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .clear-selection-btn {
+    align-self: flex-end;
+  }
+}
+
+/* Dark theme adjustments */
+.youtube-ai-container[data-theme="dark"] .channel-main-info:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.youtube-ai-container[data-theme="dark"] .videos-toggle-btn:hover {
+  background: rgba(96, 165, 250, 0.15);
+}
+
+.youtube-ai-container[data-theme="dark"] .video-item:hover {
+  background: rgba(96, 165, 250, 0.1);
+}
+
+/* FINAL GAP REDUCTION - WORKING SPECIFICITY */
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-main-info {
+  padding-bottom: 4px !important;
+  margin-bottom: 0px !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-videos-handle .videos-toggle-btn {
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  margin: 0px !important;
+}
+
+/* Reduce gap between channel cards */
+.favorite-channels-box .channels-content .channels-list {
+  gap: 8px !important;
+}
+
+/* M
+AKE CHANNEL CARDS SMALLER */
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card {
+  min-height: 100px !important;
+  max-height: none !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-main-info {
+  padding: 12px 12px 4px 12px !important;
+  min-height: 60px !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-thumbnail {
+  width: 40px !important;
+  height: 40px !important;
+  margin-right: 10px !important;
+  margin-top: 2px !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-details .channel-name {
+  font-size: 0.8em !important;
+  line-height: 1.2 !important;
+  margin-bottom: 4px !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-subscribers {
+  font-size: 0.75em !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-videos-handle .videos-toggle-btn {
+  padding: 6px 12px !important;
+  font-size: 0.8em !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .remove-channel-btn {
+  width: 18px !important;
+  height: 18px !important;
+  font-size: 0.7em !important;
+  top: 6px !important;
+  right: 6px !important;
+}
+
+/*
+ MAKE CHANNEL CARDS NARROWER */
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card {
+  max-width: 320px !important;
+  width: 100% !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item {
+  max-width: 320px !important;
+}
+
+/* Adjust text to fit narrower width */
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-details {
+  padding-right: 6px !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-details .channel-name {
+  max-width: 200px !important;
+}
+
+/* MAKE CHA
+NNEL CARDS EVEN SMALLER */
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card {
+  max-width: 280px !important;
+  min-height: 85px !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item {
+  max-width: 280px !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-main-info {
+  padding: 10px 10px 3px 10px !important;
+  min-height: 50px !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-thumbnail {
+  width: 36px !important;
+  height: 36px !important;
+  margin-right: 8px !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-details .channel-name {
+  font-size: 0.75em !important;
+  max-width: 180px !important;
+  margin-bottom: 3px !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-subscribers {
+  font-size: 0.7em !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-videos-handle .videos-toggle-btn {
+  padding: 5px 10px !important;
+  font-size: 0.75em !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .remove-channel-btn {
+  width: 16px !important;
+  height: 16px !important;
+  font-size: 0.65em !important;
+  top: 4px !important;
+  right: 4px !important;
+}
+
+/ * COMPREHENSIVE FAVORITE CHANNELS BOX ALIGNMENT */
+/* Adjust the main favorite channels box */
+.favorite-channels-box {
+  width: 320px !important;
+  padding: 0 !important;
+}
+
+/* Adjust channels content container */
+.favorite-channels-box .channels-content {
+  padding: 12px !important;
+}
+
+/* Channel monitor header alignment */
+.favorite-channels-box .channels-content .channel-monitor-header {
+  margin-bottom: 12px !important;
+  padding: 0 !important;
+}
+
+.favorite-channels-box .channels-content .channel-monitor-header h4 {
+  font-size: 0.9em !important;
+  margin: 0 !important;
+  font-weight: 600 !important;
+}
+
+.favorite-channels-box .channels-content .channel-monitor-header .monitor-controls {
+  gap: 6px !important;
+}
+
+.favorite-channels-box .channels-content .channel-monitor-header .monitor-controls button {
+  padding: 6px 8px !important;
+  font-size: 0.8em !important;
+  border-radius: 6px !important;
+}
+
+/* Instructions alignment */
+.favorite-channels-box .channels-content .monitor-instructions {
+  padding: 8px 10px !important;
+  margin-bottom: 10px !important;
+  border-radius: 6px !important;
+}
+
+.favorite-channels-box .channels-content .monitor-instructions p {
+  font-size: 0.75em !important;
+  margin: 0 !important;
+}
+
+/* Monitor settings alignment */
+.favorite-channels-box .channels-content .monitor-settings {
+  padding: 10px !important;
+  margin-bottom: 12px !important;
+  background: var(--bg-tertiary) !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.favorite-channels-box .channels-content .monitor-settings .settings-header h5 {
+  font-size: 0.8em !important;
+  margin: 0 0 8px 0 !important;
+}
+
+.favorite-channels-box .channels-content .monitor-settings .settings-grid {
+  gap: 8px !important;
+}
+
+.favorite-channels-box .channels-content .monitor-settings .setting-item label {
+  font-size: 0.75em !important;
+  margin-bottom: 4px !important;
+}
+
+.favorite-channels-box .channels-content .monitor-settings .setting-item input,
+.favorite-channels-box .channels-content .monitor-settings .setting-item select {
+  padding: 4px 6px !important;
+  font-size: 0.75em !important;
+  border-radius: 4px !important;
+}
+
+/* Add channel section alignment */
+.favorite-channels-box .channels-content .add-channel-section {
+  margin-bottom: 12px !important;
+}
+
+.favorite-channels-box .channels-content .add-channel-section .channel-input-group {
+  gap: 6px !important;
+  margin-bottom: 6px !important;
+}
+
+.favorite-channels-box .channels-content .add-channel-section .channel-url-input {
+  padding: 8px 10px !important;
+  font-size: 0.8em !important;
+  border-radius: 6px !important;
+}
+
+.favorite-channels-box .channels-content .add-channel-section .add-channel-btn {
+  padding: 8px 12px !important;
+  font-size: 0.8em !important;
+  border-radius: 6px !important;
+  white-space: nowrap !important;
+}
+
+/* Channels list alignment */
+.favorite-channels-box .channels-content .channels-list {
+  gap: 6px !important;
+  margin-top: 0 !important;
+}
+
+/* Ensure all channel cards are properly contained */
+.favorite-channels-box .channels-content .channels-list .channel-item {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+}
+
+/* Adjust verified badge and selected indicator for smaller cards */
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .verified-badge {
+  font-size: 0.6em !important;
+  padding: 1px 3px !important;
+  margin-left: 3px !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .selected-indicator {
+  font-size: 0.6em !important;
+  padding: 1px 4px !important;
+  margin-top: 2px !important;
+}
+
+/* Adjust new videos badge in handle */
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .new-badge {
+  font-size: 0.65em !important;
+  padding: 1px 4px !important;
+  margin-left: 4px !important;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .favorite-channels-box {
+    width: 100% !important;
+  }
+
+  .favorite-channels-box .channels-content {
+    padding: 10px !important;
+  }
+
+  .favorite-channels-box .channels-content .channels-list .channel-item .channel-card {
+    max-width: 100% !important;
+  }
+}
+
+/ * MOVE CHECK AND SETTINGS ICONS TO FAR RIGHT */ .favorite-channels-box .channels-content .channel-monitor-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin-bottom: 12px !important;
+  padding: 0 !important;
+}
+
+.favorite-channels-box .channels-content .channel-monitor-header h4 {
+  font-size: 0.9em !important;
+  margin: 0 !important;
+  font-weight: 600 !important;
+  flex: 1 !important;
+}
+
+.favorite-channels-box .channels-content .channel-monitor-header .monitor-controls {
+  display: flex !important;
+  gap: 4px !important;
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+}
+
+.favorite-channels-box .channels-content .channel-monitor-header .monitor-controls .btn-check-videos,
+.favorite-channels-box .channels-content .channel-monitor-header .monitor-controls .btn-settings {
+  padding: 4px 6px !important;
+  font-size: 0.75em !important;
+  border-radius: 4px !important;
+  min-width: auto !important;
+  white-space: nowrap !important;
+  background: var(--bg-tertiary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-secondary) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.favorite-channels-box .channels-content .channel-monitor-header .monitor-controls .btn-check-videos:hover,
+.favorite-channels-box .channels-content .channel-monitor-header .monitor-controls .btn-settings:hover {
+  background: var(--accent-color) !important;
+  color: white !important;
+  border-color: var(--accent-color) !important;
+}
+
+.favorite-channels-box .channels-content .channel-monitor-header .monitor-controls .btn-check-videos:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+/* Ensure the header layout is consistent */
+.favorite-channels-box .channels-content .channel-monitor-header .monitor-controls button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/*
+ MAXIMUM SPECIFICITY - FORCE BUTTON MOVEMENT */
+.youtube-ai-container .favorite-channels-box .channels-content .channel-monitor-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin-bottom: 12px !important;
+  padding: 0 !important;
+
+}
+
+.youtube-ai-container .favorite-channels-box .channels-content .channel-monitor-header h4 {
+  font-size: 0.9em !important;
+  margin: 0 !important;
+  font-weight: 600 !important;
+  flex: 1 !important;
+  color: var(--text-primary) !important;
+}
+
+.youtube-ai-container .favorite-channels-box .channels-content .channel-monitor-header .monitor-controls {
+  display: flex !important;
+  gap: 4px !important;
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+
+}
+
+.youtube-ai-container .favorite-channels-box .channels-content .channel-monitor-header .monitor-controls .btn-check-videos,
+.youtube-ai-container .favorite-channels-box .channels-content .channel-monitor-header .monitor-controls .btn-settings {
+  padding: 4px 6px !important;
+  font-size: 0.75em !important;
+  border-radius: 4px !important;
+  min-width: auto !important;
+  white-space: nowrap !important;
+  background: var(--bg-tertiary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-secondary) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+/* BUTTON 
+HOVER AND DISABLED STATES */
+.youtube-ai-container .favorite-channels-box .channels-content .channel-monitor-header .monitor-controls .btn-check-videos:hover,
+.youtube-ai-container .favorite-channels-box .channels-content .channel-monitor-header .monitor-controls .btn-settings:hover {
+  background: var(--accent-color) !important;
+  color: white !important;
+  border-color: var(--accent-color) !important;
+}
+
+.youtube-ai-container .favorite-channels-box .channels-content .channel-monitor-header .monitor-controls .btn-check-videos:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  background: var(--bg-tertiary) !important;
+  color: var(--text-muted) !important;
+}
+
+.youtube-ai-container .favorite-channels-box .channels-content .channel-monitor-header .monitor-controls .btn-check-videos:disabled:hover {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-muted) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* MA
+KE FAVORITE CHANNELS BOX SMALLER WIDTH */
+.favorite-channels-box {
+  width: 280px !important;
+}
+
+/* Ensure all content fits in the smaller width */
+.favorite-channels-box .channels-content {
+  padding: 10px !important;
+}
+
+/* Adjust channel cards to fit smaller container */
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card {
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Adjust add channel input for smaller width */
+.favorite-channels-box .channels-content .add-channel-section .channel-input-group {
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+.favorite-channels-box .channels-content .add-channel-section .channel-url-input {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.favorite-channels-box .channels-content .add-channel-section .add-channel-btn {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Adjust monitor settings for smaller width */
+.favorite-channels-box .channels-content .monitor-settings .settings-grid {
+  grid-template-columns: 1fr !important;
+}
+
+.favorite-channels-box .channels-content .monitor-settings .interval-setting {
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+.favorite-channels-box .channels-content .monitor-settings .interval-value,
+.favorite-channels-box .channels-content .monitor-settings .interval-unit {
+  width: 100% !important;
+}
+
+/* =======
+=================================
+   COMPREHENSIVE FAVORITE CHANNELS BOX IMPROVEMENTS
+   ======================================== */
+
+/* 1. MAKE FAVORITE CHANNELS BOX SMALLER WIDTH */
+.favorite-channels-box {
+  width: 280px !important;
+  padding: 0 !important;
+}
+
+/* 2. ADJUST CHANNELS CONTENT CONTAINER */
+.favorite-channels-box .channels-content {
+  padding: 10px !important;
+}
+
+/* 3. MOVE CHECK AND SETTINGS BUTTONS TO FAR RIGHT */
+.youtube-ai-container .favorite-channels-box .channels-content .channel-monitor-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin-bottom: 12px !important;
+  padding: 0 !important;
+}
+
+.youtube-ai-container .favorite-channels-box .channels-content .channel-monitor-header h4 {
+  font-size: 0.9em !important;
+  margin: 0 !important;
+  font-weight: 600 !important;
+  flex: 1 !important;
+  color: var(--text-primary) !important;
+}
+
+.youtube-ai-container .favorite-channels-box .channels-content .channel-monitor-header .monitor-controls {
+  display: flex !important;
+  gap: 4px !important;
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+}
+
+.youtube-ai-container .favorite-channels-box .channels-content .channel-monitor-header .monitor-controls .btn-check-videos,
+.youtube-ai-container .favorite-channels-box .channels-content .channel-monitor-header .monitor-controls .btn-settings {
+  padding: 4px 6px !important;
+  font-size: 0.75em !important;
+  border-radius: 4px !important;
+  min-width: auto !important;
+  white-space: nowrap !important;
+  background: var(--bg-tertiary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-secondary) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.youtube-ai-container .favorite-channels-box .channels-content .channel-monitor-header .monitor-controls .btn-check-videos:hover,
+.youtube-ai-container .favorite-channels-box .channels-content .channel-monitor-header .monitor-controls .btn-settings:hover {
+  background: var(--accent-color) !important;
+  color: white !important;
+  border-color: var(--accent-color) !important;
+}
+
+.youtube-ai-container .favorite-channels-box .channels-content .channel-monitor-header .monitor-controls .btn-check-videos:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  background: var(--bg-tertiary) !important;
+  color: var(--text-muted) !important;
+}
+
+/* 4. CHANNELS LIST VERTICAL LAYOUT */
+.favorite-channels-box .channels-content .channels-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  margin-top: 0 !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* 5. MAKE CHANNEL CARDS SMALLER */
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card {
+  position: relative !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+  overflow: visible !important;
+  box-shadow: var(--shadow-sm) !important;
+  min-height: 85px !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: var(--shadow-md) !important;
+  border-color: var(--accent-color) !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card.selected {
+  border-color: var(--accent-color) !important;
+  background: var(--accent-light) !important;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
+}
+
+/* 6. CHANNEL MAIN INFO STYLING */
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-main-info {
+  display: flex !important;
+  align-items: flex-start !important;
+  padding: 10px 10px 3px 10px !important;
+  transition: background-color 0.2s ease !important;
+  flex: 1 !important;
+  min-height: 50px !important;
+  margin-bottom: 0px !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-main-info:hover {
+  background: rgba(0, 0, 0, 0.02) !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card.selected .channel-main-info {
+  background: rgba(102, 126, 234, 0.05) !important;
+}
+
+/* 7. CHANNEL THUMBNAIL */
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-thumbnail {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  border: 2px solid var(--border-color) !important;
+  transition: border-color 0.2s ease !important;
+  margin-right: 8px !important;
+  margin-top: 2px !important;
+  flex-shrink: 0 !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card:hover .channel-thumbnail {
+  border-color: var(--accent-color) !important;
+}
+
+/* 8. CHANNEL DETAILS */
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-details {
+  flex: 1 !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  padding-right: 6px !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-details .channel-name {
+  font-weight: 600 !important;
+  font-size: 0.75em !important;
+  color: var(--text-primary) !important;
+  margin-bottom: 3px !important;
+  line-height: 1.2 !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  hyphens: auto !important;
+  display: block !important;
+  max-width: 180px !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  white-space: normal !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-meta {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-subscribers {
+  font-size: 0.7em !important;
+  color: var(--text-secondary) !important;
+  font-weight: 500 !important;
+}
+
+/* 9. REMOVE CHANNEL BUTTON */
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .remove-channel-btn {
+  position: absolute !important;
+  top: 4px !important;
+  right: 4px !important;
+  background: rgba(0, 0, 0, 0.1) !important;
+  border: none !important;
+  color: var(--text-muted) !important;
+  font-size: 0.65em !important;
+  cursor: pointer !important;
+  padding: 4px !important;
+  border-radius: 50% !important;
+  transition: all 0.2s ease !important;
+  opacity: 0.7 !important;
+  width: 16px !important;
+  height: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 2 !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .remove-channel-btn:hover {
+  background: var(--error-color) !important;
+  color: white !important;
+  opacity: 1 !important;
+  transform: scale(1.1) !important;
+}
+
+/* 10. VIDEOS HANDLE SECTION */
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-videos-handle {
+  border-top: 1px solid var(--border-color) !important;
+  background: var(--bg-tertiary) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-videos-handle .videos-toggle-btn {
+  width: 100% !important;
+  background: none !important;
+  border: none !important;
+  padding: 5px 10px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  color: var(--text-secondary) !important;
+  font-size: 0.75em !important;
+  margin: 0px !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-videos-handle .videos-toggle-btn:hover {
+  background: rgba(102, 126, 234, 0.1) !important;
+  color: var(--accent-color) !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-videos-handle .videos-toggle-btn.expanded {
+  background: var(--accent-light) !important;
+  color: var(--accent-color) !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .videos-handle-content {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  font-size: 0.85em !important;
+  font-weight: 500 !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .videos-text {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .new-badge {
+  background: var(--accent-color) !important;
+  color: white !important;
+  font-size: 0.65em !important;
+  padding: 1px 4px !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  margin-left: 4px !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .toggle-arrow {
+  font-size: 0.9em !important;
+  transition: transform 0.2s ease !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .videos-toggle-btn.expanded .toggle-arrow {
+  transform: rotate(180deg) !important;
+}
+
+/* 11. BADGES AND INDICATORS */
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .verified-badge {
+  background: var(--success-color) !important;
+  color: white !important;
+  font-size: 0.6em !important;
+  padding: 1px 3px !important;
+  border-radius: 50% !important;
+  font-weight: 600 !important;
+  margin-left: 3px !important;
+  flex-shrink: 0 !important;
+}
+
+.favorite-channels-box .channels-content .channels-list .channel-item .channel-card .selected-indicator {
+  background: var(--accent-color) !important;
+  color: white !important;
+  font-size: 0.6em !important;
+  padding: 1px 4px !important;
+  border-radius: 10px !important;
+  font-weight: 500 !important;
+  margin-top: 2px !important;
+  align-self: flex-start !important;
+  flex-shrink: 0 !important;
+}
+
+/* 12. ADD CHANNEL SECTION ADJUSTMENTS */
+.favorite-channels-box .channels-content .add-channel-section {
+  margin-bottom: 12px !important;
+}
+
+.favorite-channels-box .channels-content .add-channel-section .channel-input-group {
+  flex-direction: column !important;
+  gap: 4px !important;
+  margin-bottom: 6px !important;
+}
+
+.favorite-channels-box .channels-content .add-channel-section .channel-url-input {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 8px 10px !important;
+  font-size: 0.8em !important;
+  border-radius: 6px !important;
+}
+
+.favorite-channels-box .channels-content .add-channel-section .add-channel-btn {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 8px 12px !important;
+  font-size: 0.8em !important;
+  border-radius: 6px !important;
+  white-space: nowrap !important;
+}
+
+/* 13. INSTRUCTIONS ALIGNMENT */
+.favorite-channels-box .channels-content .monitor-instructions {
+  padding: 8px 10px !important;
+  margin-bottom: 10px !important;
+  border-radius: 6px !important;
+  background: rgba(102, 126, 234, 0.1) !important;
+  border: 1px solid rgba(102, 126, 234, 0.2) !important;
+}
+
+.favorite-channels-box .channels-content .monitor-instructions p {
+  font-size: 0.75em !important;
+  margin: 0 !important;
+  color: var(--text-secondary) !important;
+  line-height: 1.4 !important;
+}
+
+.favorite-channels-box .channels-content .monitor-instructions strong {
+  color: var(--text-primary) !important;
+}
+
+/* 14. SETTINGS WINDOW ADJUSTMENTS */
+.favorite-channels-box .channels-content .monitor-settings {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 8px !important;
+  margin: 8px 0 !important;
+  background: var(--bg-tertiary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 6px !important;
+  box-sizing: border-box !important;
+}
+
+.favorite-channels-box .channels-content .monitor-settings .settings-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 8px !important;
+  padding: 0 !important;
+}
+
+.favorite-channels-box .channels-content .monitor-settings .settings-header h5 {
+  font-size: 0.8em !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+  color: var(--text-primary) !important;
+  flex: 1 !important;
+}
+
+.favorite-channels-box .channels-content .monitor-settings .settings-header .clear-selection-btn {
+  padding: 2px 6px !important;
+  font-size: 0.7em !important;
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 4px !important;
+  color: var(--text-secondary) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.favorite-channels-box .channels-content .monitor-settings .settings-header .clear-selection-btn:hover {
+  background: var(--text-muted) !important;
+  color: white !important;
+  border-color: var(--text-muted) !important;
+}
+
+.favorite-channels-box .channels-content .monitor-settings .settings-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+
+.favorite-channels-box .channels-content .monitor-settings .setting-item {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.favorite-channels-box .channels-content .monitor-settings .setting-item label {
+  display: block !important;
+  font-size: 0.75em !important;
+  font-weight: 500 !important;
+  color: var(--text-primary) !important;
+  margin-bottom: 4px !important;
+}
+
+.favorite-channels-box .channels-content .monitor-settings .setting-item .interval-setting {
+  display: flex !important;
+  gap: 4px !important;
+  width: 100% !important;
+}
+
+.favorite-channels-box .channels-content .monitor-settings .setting-item .interval-value,
+.favorite-channels-box .channels-content .monitor-settings .setting-item .interval-unit {
+  flex: 1 !important;
+  padding: 4px 6px !important;
+  font-size: 0.75em !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 4px !important;
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+.favorite-channels-box .channels-content .monitor-settings .setting-item input[type="number"] {
+  width: 100% !important;
+  padding: 4px 6px !important;
+  font-size: 0.75em !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 4px !important;
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  box-sizing: border-box !important;
+}
+
+/* Focus states for form elements */
+.favorite-channels-box .channels-content .monitor-settings .setting-item input:focus,
+.favorite-channels-box .channels-content .monitor-settings .setting-item select:focus {
+  outline: none !important;
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
+}
+
+/* 15. MOBILE RESPONSIVE ADJUSTMENTS */
+@media (max-width: 768px) {
+  .favorite-channels-box {
+    width: 100% !important;
+  }
+
+  .favorite-channels-box .channels-content {
+    padding: 10px !important;
+  }
+
+  .favorite-channels-box .channels-content .channels-list .channel-item .channel-card {
+    max-width: 100% !important;
+  }
+
+  .favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-main-info {
+    padding: 8px 8px 2px 8px !important;
+    min-height: 45px !important;
+  }
+
+  .favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-thumbnail {
+    width: 32px !important;
+    height: 32px !important;
+    margin-right: 6px !important;
+  }
+
+  .favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-details .channel-name {
+    font-size: 0.7em !important;
+    max-width: 150px !important;
+  }
+
+  .favorite-channels-box .channels-content .channels-list .channel-item .channel-card .channel-subscribers {
+    font-size: 0.65em !important;
+  }
+}
+
+/ * New Channel Welcome Message */ .new-channel-welcome {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--success-light), var(--accent-light));
+  border: 1px solid var(--success-color);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  animation: slideInDown 0.4s ease-out;
+}
+
+.new-channel-welcome::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--success-color), var(--accent-color));
+}
+
+.welcome-message p {
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.welcome-message p:last-child {
+  margin-bottom: 0;
+}
+
+.welcome-tip {
+  font-size: 12px !important;
+  color: var(--text-secondary) !important;
+  font-style: italic;
+  opacity: 0.9;
+}
+
+/* Animation for welcome message */
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced settings panel for new channel setup */
+.monitor-settings {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.settings-header h5 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.clear-selection-btn {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.clear-selection-btn:hover {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+  transform: translateY(-1px);
+}
+
+.settings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.setting-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.setting-item label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.interval-setting {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.interval-setting input,
+.interval-setting select {
+  padding: 8px 12px;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 14px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.interval-setting input:focus,
+.interval-setting select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+/* Mobile responsiveness for new channel setup */
+@media (max-width: 768px) {
+  .new-channel-welcome {
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  .welcome-message p {
+    font-size: 13px;
+  }
+
+  .welcome-tip {
+    font-size: 11px !important;
+  }
+
+  .monitor-settings {
+    padding: 16px;
+  }
+
+  .settings-header {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .settings-header h5 {
+    font-size: 14px;
+  }
+}
+
+/* S
+etup Actions for New Channel */
+.setup-actions {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.complete-setup-btn {
+  background: linear-gradient(135deg, var(--success-color), var(--accent-color));
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 160px;
+  justify-content: center;
+}
+
+.complete-setup-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  background: linear-gradient(135deg, #38a169, var(--accent-hover));
+}
+
+.complete-setup-btn:active {
+  transform: translateY(0);
+}
+
+.setup-note {
+  margin: 12px 0 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Enhanced animation for new channel setup */
+.monitor-settings.new-setup {
+  animation: highlightSetup 0.6s ease-out;
+}
+
+@keyframes highlightSetup {
+  0% {
+    background: var(--bg-tertiary);
+    box-shadow: var(--shadow-sm);
+  }
+
+  50% {
+    background: var(--accent-light);
+    box-shadow: 0 0 20px var(--accent-light);
+  }
+
+  100% {
+    background: var(--bg-tertiary);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* N
+ewly Added Channel Highlight */
+.channel-item.newly-added {
+  animation: newChannelHighlight 2s ease-out;
+  border: 2px solid var(--success-color);
+  box-shadow: 0 0 15px var(--success-light);
+}
+
+@keyframes newChannelHighlight {
+  0% {
+    background: var(--success-light);
+    transform: scale(1.02);
+  }
+
+  50% {
+    background: var(--success-light);
+    transform: scale(1.02);
+  }
+
+  100% {
+    background: var(--bg-tertiary);
+    transform: scale(1);
+  }
+}
+
+/* Clear highlight animation after it completes */
+.channel-item.newly-added.animation-complete {
+  animation: none;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+/* =====
+===================================
+   FEATURE DOCUMENTATION
+   ======================================== 
+
+   NEW FEATURES ADDED:
+   
+   1. AUTO-OPEN SETTINGS FOR NEW CHANNELS
+      - When user adds a channel, settings panel opens automatically
+      - New channel gets highlighted with animation
+      - Welcome message guides user through setup
+      - "Complete Setup" button to finish configuration
+   
+   2. FIXED: CHECK INTERVAL TIME UNITS
+      - Hours, days, and weeks now save correctly
+      - Backend stores both user-friendly format and calculated minutes
+      - Frontend only shows clean user-friendly format
+      - Proper conversion between formats when loading from backend
+   
+   3. SCROLLABLE CHANNEL LIST
+      - Limited to 4 channel cards visible
+      - Smooth scrolling for additional channels
+      - Custom scrollbar styling
+      - Mobile responsive (3 cards on mobile)
+   
+   CSS Classes Added:
+   - .new-channel-welcome: Welcome message for new channels
+   - .setup-actions: Complete setup button area
+   - .channel-item.newly-added: Highlight animation for new channels
+   - .channels-list-container: Scrollable container for channel cards
+   
+   ======================================== */

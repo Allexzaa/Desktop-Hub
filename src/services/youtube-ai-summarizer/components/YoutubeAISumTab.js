@@ -59,6 +59,22 @@ const YoutubeAISumTab = () => {
         }
     });
 
+    // State for dropdown features box
+    const [featuresDropdown, setFeaturesDropdown] = useState({
+        isVisible: true,
+        activeDropdown: null, // 'export', 'analysis', 'tools', 'templates'
+        exportOptions: {
+            format: 'markdown',
+            includeMetadata: true,
+            includeTimestamp: true
+        },
+        analysisOptions: {
+            showWordCount: true,
+            showReadingTime: true,
+            showSentiment: false
+        }
+    });
+
     const apiClient = useRef(new YouTubeAIApiClient()).current;
 
     useEffect(() => {
@@ -691,6 +707,141 @@ const YoutubeAISumTab = () => {
                 message: `❌ API test failed: ${error.message}`
             };
         }
+    };
+
+    // Features dropdown functions
+    const toggleFeaturesDropdown = (dropdownType) => {
+        setFeaturesDropdown(prev => ({
+            ...prev,
+            activeDropdown: prev.activeDropdown === dropdownType ? null : dropdownType
+        }));
+    };
+
+    const toggleFeaturesBox = () => {
+        setFeaturesDropdown(prev => ({
+            ...prev,
+            isVisible: !prev.isVisible
+        }));
+    };
+
+    const handleExport = (format) => {
+        let content = '';
+        let filename = '';
+        
+        switch (format) {
+            case 'markdown':
+                content = generateMarkdownExport();
+                filename = 'youtube-summary.md';
+                break;
+            case 'txt':
+                content = generateTextExport();
+                filename = 'youtube-summary.txt';
+                break;
+            case 'json':
+                content = generateJSONExport();
+                filename = 'youtube-summary.json';
+                break;
+            default:
+                return;
+        }
+
+        downloadFile(content, filename);
+        showStatus(`Exported as ${format.toUpperCase()}!`, 'success');
+    };
+
+    const generateMarkdownExport = () => {
+        let content = '';
+        
+        if (currentVideoInfo) {
+            content += `# ${currentVideoInfo.title}\n\n`;
+            content += `**Channel:** ${currentVideoInfo.channelName}\n`;
+            content += `**URL:** ${currentUrl}\n`;
+            if (featuresDropdown.exportOptions.includeTimestamp) {
+                content += `**Exported:** ${new Date().toLocaleString()}\n`;
+            }
+            content += '\n---\n\n';
+        }
+
+        if (aiSummary) {
+            content += '## AI Summary\n\n';
+            content += aiSummary + '\n\n';
+        }
+
+        if (currentTranscript && featuresDropdown.exportOptions.includeMetadata) {
+            content += '## Full Transcript\n\n';
+            content += currentTranscript + '\n\n';
+        }
+
+        return content;
+    };
+
+    const generateTextExport = () => {
+        let content = '';
+        
+        if (currentVideoInfo) {
+            content += `${currentVideoInfo.title}\n`;
+            content += `Channel: ${currentVideoInfo.channelName}\n`;
+            content += `URL: ${currentUrl}\n`;
+            if (featuresDropdown.exportOptions.includeTimestamp) {
+                content += `Exported: ${new Date().toLocaleString()}\n`;
+            }
+            content += '\n' + '='.repeat(50) + '\n\n';
+        }
+
+        if (aiSummary) {
+            content += 'AI SUMMARY:\n\n';
+            content += aiSummary + '\n\n';
+        }
+
+        if (currentTranscript && featuresDropdown.exportOptions.includeMetadata) {
+            content += 'FULL TRANSCRIPT:\n\n';
+            content += currentTranscript + '\n\n';
+        }
+
+        return content;
+    };
+
+    const generateJSONExport = () => {
+        const data = {
+            videoInfo: currentVideoInfo,
+            url: currentUrl,
+            aiSummary: aiSummary,
+            transcript: featuresDropdown.exportOptions.includeMetadata ? currentTranscript : null,
+            exportedAt: featuresDropdown.exportOptions.includeTimestamp ? new Date().toISOString() : null,
+            settings: {
+                model: settings.models.aiSummary,
+                outputFormat: settings.summaryPreferences.outputFormat
+            }
+        };
+        
+        return JSON.stringify(data, null, 2);
+    };
+
+    const downloadFile = (content, filename) => {
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    const getAnalysisData = () => {
+        const data = {
+            wordCount: 0,
+            readingTime: 0,
+            sentiment: 'neutral'
+        };
+
+        if (aiSummary) {
+            data.wordCount = aiSummary.split(/\s+/).length;
+            data.readingTime = Math.ceil(data.wordCount / 200); // Average reading speed
+        }
+
+        return data;
     };
 
     return (
@@ -1397,8 +1548,11 @@ const YoutubeAISumTab = () => {
                 )}
 
                 <main className="youtube-ai-content">
-                    {/* Input Section */}
-                    <div className="input-section">
+                    <div className="content-layout">
+                        {/* Main Content Area */}
+                        <div className="main-content-area">
+                            {/* Input Section */}
+                            <div className="input-section">
                         <div className="input-group">
                             <label htmlFor="youtube-url">YouTube URL:</label>
                             <input
@@ -1540,6 +1694,237 @@ const YoutubeAISumTab = () => {
                             </div>
                         </div>
                     )}
+                        </div>
+
+                        {/* Features Dropdown Box */}
+                        {featuresDropdown.isVisible && (
+                            <div className="features-dropdown-box">
+                                <div className="features-header">
+                                    <h3>🛠️ Features</h3>
+                                    <button 
+                                        className="features-toggle-btn"
+                                        onClick={toggleFeaturesBox}
+                                        title="Hide features panel"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+
+                                <div className="features-content">
+                                    {/* Export Dropdown */}
+                                    <div className="feature-item">
+                                        <button 
+                                            className={`feature-btn ${featuresDropdown.activeDropdown === 'export' ? 'active' : ''}`}
+                                            onClick={() => toggleFeaturesDropdown('export')}
+                                        >
+                                            📤 Export
+                                            <span className="dropdown-arrow">
+                                                {featuresDropdown.activeDropdown === 'export' ? '▲' : '▼'}
+                                            </span>
+                                        </button>
+                                        
+                                        {featuresDropdown.activeDropdown === 'export' && (
+                                            <div className="dropdown-content">
+                                                <div className="dropdown-options">
+                                                    <button 
+                                                        className="dropdown-option"
+                                                        onClick={() => handleExport('markdown')}
+                                                        disabled={!aiSummary && !currentTranscript}
+                                                    >
+                                                        📝 Markdown (.md)
+                                                    </button>
+                                                    <button 
+                                                        className="dropdown-option"
+                                                        onClick={() => handleExport('txt')}
+                                                        disabled={!aiSummary && !currentTranscript}
+                                                    >
+                                                        📄 Text (.txt)
+                                                    </button>
+                                                    <button 
+                                                        className="dropdown-option"
+                                                        onClick={() => handleExport('json')}
+                                                        disabled={!aiSummary && !currentTranscript}
+                                                    >
+                                                        🔧 JSON (.json)
+                                                    </button>
+                                                </div>
+                                                
+                                                <div className="export-settings">
+                                                    <label className="checkbox-label">
+                                                        <input 
+                                                            type="checkbox"
+                                                            checked={featuresDropdown.exportOptions.includeMetadata}
+                                                            onChange={(e) => setFeaturesDropdown(prev => ({
+                                                                ...prev,
+                                                                exportOptions: {
+                                                                    ...prev.exportOptions,
+                                                                    includeMetadata: e.target.checked
+                                                                }
+                                                            }))}
+                                                        />
+                                                        Include transcript
+                                                    </label>
+                                                    <label className="checkbox-label">
+                                                        <input 
+                                                            type="checkbox"
+                                                            checked={featuresDropdown.exportOptions.includeTimestamp}
+                                                            onChange={(e) => setFeaturesDropdown(prev => ({
+                                                                ...prev,
+                                                                exportOptions: {
+                                                                    ...prev.exportOptions,
+                                                                    includeTimestamp: e.target.checked
+                                                                }
+                                                            }))}
+                                                        />
+                                                        Include timestamp
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Analysis Dropdown */}
+                                    <div className="feature-item">
+                                        <button 
+                                            className={`feature-btn ${featuresDropdown.activeDropdown === 'analysis' ? 'active' : ''}`}
+                                            onClick={() => toggleFeaturesDropdown('analysis')}
+                                        >
+                                            📊 Analysis
+                                            <span className="dropdown-arrow">
+                                                {featuresDropdown.activeDropdown === 'analysis' ? '▲' : '▼'}
+                                            </span>
+                                        </button>
+                                        
+                                        {featuresDropdown.activeDropdown === 'analysis' && (
+                                            <div className="dropdown-content">
+                                                {aiSummary ? (
+                                                    <div className="analysis-stats">
+                                                        <div className="stat-item">
+                                                            <span className="stat-label">📝 Words:</span>
+                                                            <span className="stat-value">{getAnalysisData().wordCount}</span>
+                                                        </div>
+                                                        <div className="stat-item">
+                                                            <span className="stat-label">⏱️ Reading time:</span>
+                                                            <span className="stat-value">{getAnalysisData().readingTime} min</span>
+                                                        </div>
+                                                        <div className="stat-item">
+                                                            <span className="stat-label">📈 Characters:</span>
+                                                            <span className="stat-value">{aiSummary.length}</span>
+                                                        </div>
+                                                        {currentTranscript && (
+                                                            <div className="stat-item">
+                                                                <span className="stat-label">📜 Original length:</span>
+                                                                <span className="stat-value">{Math.round(currentTranscript.length / 1000)}k chars</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <div className="no-data">
+                                                        <p>Generate a summary to see analysis</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Tools Dropdown */}
+                                    <div className="feature-item">
+                                        <button 
+                                            className={`feature-btn ${featuresDropdown.activeDropdown === 'tools' ? 'active' : ''}`}
+                                            onClick={() => toggleFeaturesDropdown('tools')}
+                                        >
+                                            🔧 Tools
+                                            <span className="dropdown-arrow">
+                                                {featuresDropdown.activeDropdown === 'tools' ? '▲' : '▼'}
+                                            </span>
+                                        </button>
+                                        
+                                        {featuresDropdown.activeDropdown === 'tools' && (
+                                            <div className="dropdown-content">
+                                                <div className="tool-options">
+                                                    <button 
+                                                        className="tool-btn"
+                                                        onClick={() => copyToClipboard('ai-summary')}
+                                                        disabled={!aiSummary}
+                                                    >
+                                                        📋 Copy Summary
+                                                    </button>
+                                                    <button 
+                                                        className="tool-btn"
+                                                        onClick={() => copyToClipboard('transcript')}
+                                                        disabled={!currentTranscript}
+                                                    >
+                                                        📋 Copy Transcript
+                                                    </button>
+                                                    <button 
+                                                        className="tool-btn"
+                                                        onClick={() => {
+                                                            setCurrentUrl('');
+                                                            setCurrentTranscript('');
+                                                            setAiSummary('');
+                                                            setCurrentVideoInfo(null);
+                                                            showStatus('Workspace cleared!', 'success');
+                                                        }}
+                                                    >
+                                                        🗑️ Clear All
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Templates Dropdown */}
+                                    <div className="feature-item">
+                                        <button 
+                                            className={`feature-btn ${featuresDropdown.activeDropdown === 'templates' ? 'active' : ''}`}
+                                            onClick={() => toggleFeaturesDropdown('templates')}
+                                        >
+                                            📋 Templates
+                                            <span className="dropdown-arrow">
+                                                {featuresDropdown.activeDropdown === 'templates' ? '▲' : '▼'}
+                                            </span>
+                                        </button>
+                                        
+                                        {featuresDropdown.activeDropdown === 'templates' && (
+                                            <div className="dropdown-content">
+                                                <div className="template-options">
+                                                    <button 
+                                                        className="template-btn"
+                                                        onClick={() => setCurrentUrl('demo')}
+                                                    >
+                                                        🎬 Demo Video
+                                                    </button>
+                                                    <button 
+                                                        className="template-btn"
+                                                        onClick={() => setCurrentUrl('tech-talk')}
+                                                    >
+                                                        💻 Tech Talk Demo
+                                                    </button>
+                                                    <button 
+                                                        className="template-btn"
+                                                        onClick={() => setCurrentUrl('speech')}
+                                                    >
+                                                        🎤 Speech Demo
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Show Features Button when hidden */}
+                        {!featuresDropdown.isVisible && (
+                            <button 
+                                className="show-features-btn"
+                                onClick={toggleFeaturesBox}
+                                title="Show features panel"
+                            >
+                                🛠️
+                            </button>
+                        )}
+                    </div>
                 </main>
 
 

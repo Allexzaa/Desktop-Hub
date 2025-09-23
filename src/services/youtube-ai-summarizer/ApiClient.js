@@ -209,133 +209,9 @@ class YouTubeAIApiClient {
         }
     }
 
-    // Monitor Settings
-    async getMonitorSettings() {
-        try {
-            const response = await fetch(`${this.baseUrl}/api/monitor/settings`);
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
 
-            const data = await response.json();
-            
-            if (!data.success) {
-                throw new Error('Failed to get monitor settings');
-            }
-            
-            return data.settings;
-        } catch (error) {
-            console.error('Error fetching monitor settings:', error);
-            throw error;
-        }
-    }
 
-    async updateMonitorSettings(settings) {
-        try {
-            const response = await fetch(`${this.baseUrl}/api/monitor/settings`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(settings)
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            
-            if (!data.success) {
-                throw new Error(data.error || 'Failed to update monitor settings');
-            }
-            
-            return data;
-        } catch (error) {
-            console.error('Error updating monitor settings:', error);
-            throw error;
-        }
-    }
-
-    async updateChannelSettings(channelId, settings) {
-        try {
-            const response = await fetch(`${this.baseUrl}/api/channel/settings`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ channelId, settings })
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            
-            if (!data.success) {
-                throw new Error(data.error || 'Failed to update channel settings');
-            }
-            
-            return data;
-        } catch (error) {
-            console.error('Error updating channel settings:', error);
-            throw error;
-        }
-    }
-
-    async startMonitoring() {
-        try {
-            const response = await fetch(`${this.baseUrl}/api/monitor/start`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            
-            if (!data.success) {
-                throw new Error(data.error || 'Failed to start monitoring');
-            }
-            
-            return data;
-        } catch (error) {
-            console.error('Error starting monitoring:', error);
-            throw error;
-        }
-    }
-
-    async stopMonitoring() {
-        try {
-            const response = await fetch(`${this.baseUrl}/api/monitor/stop`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            
-            if (!data.success) {
-                throw new Error(data.error || 'Failed to stop monitoring');
-            }
-            
-            return data;
-        } catch (error) {
-            console.error('Error stopping monitoring:', error);
-            throw error;
-        }
-    }
 
     async checkServiceHealth() {
         try {
@@ -395,10 +271,7 @@ class YouTubeAIApiClient {
     extractVideoId(url) {
         if (!url) return null;
 
-        // Handle demo modes
-        if (url.toLowerCase() === 'demo' || url.toLowerCase() === 'speech' || url.toLowerCase() === 'tech-talk') {
-            return url.toLowerCase();
-        }
+
 
         // YouTube URL patterns
         const patterns = [

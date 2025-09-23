@@ -61,7 +61,9 @@ const TabBar = ({ tabs, activeTabId, onSwitchTab, currentTheme }) => {
     >
       <div className="sidebar-header">
         <div className="app-logo">
-          <span className="logo-icon">🏠</span>
+          <span className="logo-icon">
+            <img src="./desktop-hub-icon.jpg" alt="Desktop Hub" className="logo-icon-img" />
+          </span>
           {!isCollapsed && <span className="app-title">Desktop Hub</span>}
         </div>
       </div>
@@ -76,7 +78,13 @@ const TabBar = ({ tabs, activeTabId, onSwitchTab, currentTheme }) => {
               onClick={() => onSwitchTab(tab.id)}
               title={tab.title}
             >
-              <span className="nav-icon">{tab.icon}</span>
+              <span className="nav-icon">
+                {tab.icon.startsWith('/') || tab.icon.startsWith('./') || tab.icon.startsWith('http') ? (
+                  <img src={tab.icon} alt={tab.title} className="nav-icon-img" />
+                ) : (
+                  tab.icon
+                )}
+              </span>
               {!isCollapsed && <span className="nav-label">{tab.title}</span>}
             </button>
           ))}

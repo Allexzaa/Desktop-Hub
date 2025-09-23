@@ -5,8 +5,10 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
-    "dev": "concurrently \"npm run start-react\" \"wait-on http://localhost:3010 && electron .\"",
+    "dev": "concurrently \"npm run start-react\" \"npm run start-backend\" \"wait-on http://localhost:3010 http://localhost:8082 && cross-env ELECTRON_DEV=true electron .\" --names \"REACT,BACKEND,ELECTRON\" --prefix-colors \"blue,green,yellow\"",
+    "dev-build": "npm run build && concurrently \"npm run start-backend\" \"electron .\" --names \"BACKEND,ELECTRON\" --prefix-colors \"green,yellow\"",
     "start-react": "craco start",
+    "start-backend": "node src/services/youtube-ai-summarizer/backend/server.js",
     "build": "craco build",
     "build-electron": "npm run build && electron-builder",
     "dist": "npm run build && electron-builder --publish=never"
@@ -16,6 +18,7 @@
   "devDependencies": {
     "@craco/craco": "^7.1.0",
     "concurrently": "^7.6.0",
+    "cross-env": "^7.0.3",
     "electron": "^38.1.2",
     "electron-builder": "^24.6.4",
     "wait-on": "^7.0.1"

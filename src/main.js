@@ -1,6 +1,11 @@
 const { app, BrowserWindow, Menu } = require('electron');
 const path = require('path');
-const isDev = !require('electron').app.isPackaged;
+const fs = require('fs');
+
+// Check if we should use development server or built files
+const isDev = process.env.ELECTRON_DEV === 'true';
+const buildPath = path.join(__dirname, '../build/index.html');
+const useBuild = !isDev && fs.existsSync(buildPath);
 
 let mainWindow;
 
@@ -21,10 +26,17 @@ function createWindow() {
     show: false
   });
 
-  const startUrl = isDev
-    ? 'http://localhost:3010'
-    : `file://${path.join(__dirname, '../build/index.html')}`;
+  let startUrl;
+  if (isDev) {
+    startUrl = 'http://localhost:3010';
+  } else if (useBuild) {
+    startUrl = `file://${buildPath}`;
+  } else {
+    // Fallback - try development server
+    startUrl = 'http://localhost:3010';
+  }
 
+  console.log(`Loading Electron app from: ${startUrl}`);
   mainWindow.loadURL(startUrl);
 
   mainWindow.once('ready-to-show', () => {

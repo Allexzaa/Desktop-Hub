@@ -38,10 +38,8 @@ if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
-// Default monitoring settings
+// Default settings
 const DEFAULT_SETTINGS = {
-    checkIntervalMinutes: 60, // Check every hour
-    videoLookbackHours: 24,   // Look for videos from last 24 hours (fixed)
     maxVideosPerChannel: 5    // Keep last 5 videos per channel
 };
 
@@ -49,7 +47,6 @@ const DEFAULT_SETTINGS = {
 class YouTubeChannelVideoMonitor {
     constructor() {
         this.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-        this.monitorInterval = null;
         this.settings = this.loadSettings();
         this.favoriteChannels = this.loadFavoriteChannels();
         this.recentVideos = this.loadRecentVideos();
@@ -315,39 +312,23 @@ class YouTubeChannelVideoMonitor {
 
     async checkForNewVideos() {
         console.log('Checking for new videos...');
-        const cutoffTime = new Date(Date.now() - this.settings.videoLookbackHours * 60 * 60 * 1000);
-        let newVideosFound = 0;
+        let totalVideosFound = 0;
 
         for (const channel of this.favoriteChannels) {
             try {
                 console.log(`Checking channel: ${channel.name}`);
                 const videos = await this.fetchChannelVideos(channel.url);
 
-                // Filter for new videos within the lookback period
-                const newVideos = videos.filter(video => {
-                    const isNew = video.publishedTime > cutoffTime;
-                    const notAlreadyStored = !this.recentVideos[channel.id]?.some(stored => stored.id === video.id);
-                    return isNew && notAlreadyStored;
-                });
+                if (videos.length > 0) {
+                    console.log(`Found ${videos.length} videos for ${channel.name}`);
+                    totalVideosFound += videos.length;
 
-                if (newVideos.length > 0) {
-                    console.log(`Found ${newVideos.length} new videos for ${channel.name}`);
-                    newVideosFound += newVideos.length;
-
-                    // Add new videos to the beginning of the array
-                    if (!this.recentVideos[channel.id]) {
-                        this.recentVideos[channel.id] = [];
-                    }
-
-                    this.recentVideos[channel.id] = [
-                        ...newVideos,
-                        ...this.recentVideos[channel.id]
-                    ].slice(0, this.settings.maxVideosPerChannel); // Keep only the latest N videos
+                    // Store the latest videos (up to maxVideosPerChannel)
+                    const latestVideos = videos.slice(0, this.settings.maxVideosPerChannel);
+                    this.recentVideos[channel.id] = latestVideos;
+                } else {
+                    console.log(`No videos found for ${channel.name}`);
                 }
-
-                // Always update with latest videos (even if not "new")
-                const allRecentVideos = videos.slice(0, this.settings.maxVideosPerChannel);
-                this.recentVideos[channel.id] = allRecentVideos;
 
             } catch (error) {
                 console.error(`Error checking videos for ${channel.name}:`, error.message);
@@ -355,42 +336,13 @@ class YouTubeChannelVideoMonitor {
         }
 
         this.saveRecentVideos();
-        console.log(`Video check complete. Found ${newVideosFound} new videos total.`);
-        return newVideosFound;
-    }
-
-    startMonitoring() {
-        if (this.monitorInterval) {
-            clearInterval(this.monitorInterval);
-        }
-
-        console.log(`Starting video monitoring every ${this.settings.checkIntervalMinutes} minutes`);
-
-        // Run initial check
-        this.checkForNewVideos();
-
-        // Set up recurring checks
-        this.monitorInterval = setInterval(() => {
-            this.checkForNewVideos();
-        }, this.settings.checkIntervalMinutes * 60 * 1000);
-    }
-
-    stopMonitoring() {
-        if (this.monitorInterval) {
-            clearInterval(this.monitorInterval);
-            this.monitorInterval = null;
-            console.log('Video monitoring stopped');
-        }
+        console.log(`Video check complete. Found ${totalVideosFound} total videos.`);
+        return totalVideosFound;
     }
 
     updateSettings(newSettings) {
         this.settings = { ...this.settings, ...newSettings };
         this.saveSettings();
-
-        // Restart monitoring with new settings
-        if (this.monitorInterval) {
-            this.startMonitoring();
-        }
     }
 
     getFavoriteChannels() {
@@ -405,30 +357,7 @@ class YouTubeChannelVideoMonitor {
         return this.settings;
     }
 
-    updateChannelSettings(channelId, settings) {
-        // Find the channel in favorite channels
-        const channelIndex = this.favoriteChannels.findIndex(ch => ch.id === channelId);
-        
-        if (channelIndex === -1) {
-            console.log(`Channel with ID ${channelId} not found`);
-            return false;
-        }
 
-        // Update the channel settings
-        this.favoriteChannels[channelIndex] = {
-            ...this.favoriteChannels[channelIndex],
-            settings: {
-                ...this.favoriteChannels[channelIndex].settings,
-                ...settings
-            }
-        };
-
-        // Save the updated channels
-        this.saveFavoriteChannels();
-        
-        console.log(`Updated settings for channel: ${this.favoriteChannels[channelIndex].name}`);
-        return true;
-    }
 }
 
 // Initialize the video monitor
@@ -895,6 +824,24 @@ const mimeTypes = {
     '.ico': 'image/x-icon'
 };
 
+// Helper functions
+
+async function getVideoInfo(videoId) {
+    try {
+        // Basic video info extraction - could be enhanced with actual YouTube API
+        // For now, return placeholder info
+        return {
+            title: `Video ${videoId}`,
+            channelName: 'YouTube Channel',
+            duration: 'Unknown',
+            videoId: videoId
+        };
+    } catch (error) {
+        console.error('Error getting video info:', error);
+        return null;
+    }
+}
+
 // Create HTTP server
 const server = http.createServer(async (req, res) => {
     // Enable CORS
@@ -915,6 +862,175 @@ const server = http.createServer(async (req, res) => {
     if (pathname === '/api/health') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() }));
+        return;
+    }
+
+    // Transcript extraction endpoint
+    if (pathname === '/api/transcript') {
+        try {
+            const videoId = parsedUrl.searchParams.get('videoId');
+            if (!videoId) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Video ID is required' }));
+                return;
+            }
+
+            console.log(`Extracting transcript for video ID: ${videoId}`);
+
+
+
+            // Try to extract transcript using youtube-transcript package
+            if (YoutubeTranscript) {
+                try {
+                    console.log(`Attempting to fetch transcript for video: ${videoId}`);
+                    
+                    // Try multiple approaches for better success rate
+                    let transcriptArray = null;
+                    const approaches = [
+                        () => YoutubeTranscript.fetchTranscript(videoId),
+                        () => YoutubeTranscript.fetchTranscript(videoId, { lang: 'en' }),
+                        () => YoutubeTranscript.fetchTranscript(videoId, { lang: 'en', country: 'US' }),
+                        () => YoutubeTranscript.fetchTranscript(videoId, { lang: 'en', country: 'EN' })
+                    ];
+
+                    for (let i = 0; i < approaches.length; i++) {
+                        try {
+                            console.log(`Trying approach ${i + 1}...`);
+                            transcriptArray = await approaches[i]();
+                            if (transcriptArray && transcriptArray.length > 0) {
+                                console.log(`Success with approach ${i + 1}: ${transcriptArray.length} transcript segments`);
+                                break;
+                            }
+                        } catch (approachError) {
+                            console.log(`Approach ${i + 1} failed: ${approachError.message}`);
+                            if (i === approaches.length - 1) {
+                                throw approachError; // Re-throw the last error
+                            }
+                        }
+                    }
+
+                    if (!transcriptArray || transcriptArray.length === 0) {
+                        throw new Error('No transcript data returned from any approach');
+                    }
+                    
+                    // Convert transcript array to text
+                    const transcriptText = transcriptArray.map(item => item.text).join(' ');
+                    
+                    if (!transcriptText || transcriptText.trim().length === 0) {
+                        throw new Error('Transcript text is empty');
+                    }
+                    
+                    // Try to get video info from YouTube (basic implementation)
+                    const videoInfo = await getVideoInfo(videoId) || {
+                        title: 'Unknown Video',
+                        channelName: 'Unknown Channel',
+                        duration: 'Unknown',
+                        videoId: videoId
+                    };
+
+                    const transcriptData = {
+                        transcript: transcriptText,
+                        language: 'en', // Could be enhanced to detect language
+                        isAutoGenerated: true // Could be enhanced to detect if auto-generated
+                    };
+
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        transcript: transcriptData,
+                        videoInfo: videoInfo
+                    }));
+                    
+                    console.log(`Transcript extracted successfully for ${videoId}: ${transcriptText.length} characters`);
+                } catch (transcriptError) {
+                    console.error(`Transcript extraction failed for ${videoId}:`, transcriptError.message);
+                    console.error('Full error:', transcriptError);
+                    
+                    // Provide more specific error messages
+                    let errorMessage = 'Transcript not available for this video.';
+                    if (transcriptError.message.includes('Transcript is disabled')) {
+                        errorMessage = 'Transcript is disabled for this video by the creator.';
+                    } else if (transcriptError.message.includes('No transcript found')) {
+                        errorMessage = 'No transcript found for this video. The video may not have captions enabled.';
+                    } else if (transcriptError.message.includes('Video unavailable')) {
+                        errorMessage = 'Video is unavailable or private.';
+                    } else if (transcriptError.message.includes('Video not found')) {
+                        errorMessage = 'Video not found. Please check the video ID.';
+                    }
+                    
+                    res.writeHead(404, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ 
+                        error: `${errorMessage} Details: ${transcriptError.message}` 
+                    }));
+                }
+            } else {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ 
+                    error: 'Transcript extraction service not available. Please install youtube-transcript package.' 
+                }));
+            }
+        } catch (error) {
+            console.error('Transcript endpoint error:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: error.message }));
+        }
+        return;
+    }
+
+    // Summarize endpoint
+    if (pathname === '/api/summarize' && req.method === 'POST') {
+        try {
+            let body = '';
+            req.on('data', chunk => {
+                body += chunk.toString();
+            });
+
+            req.on('end', async () => {
+                try {
+                    const { transcript, model = 'gemma2:9b', options = {} } = JSON.parse(body);
+
+                    if (!transcript) {
+                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'Transcript is required' }));
+                        return;
+                    }
+
+                    console.log('Received summarize request:', { model, options });
+
+                    // Simple Ollama API call for summarization
+                    const ollamaResponse = await fetch('http://localhost:11434/api/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            model: model,
+                            prompt: `Please summarize the following transcript:\n\n${transcript}`,
+                            stream: false,
+                            options: {
+                                temperature: options.temperature || 0.4,
+                                max_tokens: options.maxTokens || 1200
+                            }
+                        })
+                    });
+
+                    if (!ollamaResponse.ok) {
+                        throw new Error(`Ollama API error: ${ollamaResponse.status}`);
+                    }
+
+                    const ollamaData = await ollamaResponse.json();
+                    const summary = ollamaData.response;
+
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ summary }));
+                } catch (parseError) {
+                    console.error('Summarize parsing error:', parseError);
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Invalid JSON or processing error: ' + parseError.message }));
+                }
+            });
+        } catch (error) {
+            console.error('Summarize endpoint error:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: error.message }));
+        }
         return;
     }
 
@@ -988,10 +1104,7 @@ const server = http.createServer(async (req, res) => {
                     // Add to favorites
                     videoMonitor.addFavoriteChannel(channelInfo);
 
-                    // Start monitoring if not already started
-                    if (!videoMonitor.monitorInterval) {
-                        videoMonitor.startMonitoring();
-                    }
+
 
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({
@@ -1087,143 +1200,11 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    // Get monitoring settings
-    if (pathname === '/api/monitor/settings') {
-        try {
-            const settings = videoMonitor.getSettings();
 
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
-                success: true,
-                settings: settings
-            }));
-        } catch (error) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: error.message }));
-        }
-        return;
-    }
 
-    // Update monitoring settings
-    if (pathname === '/api/monitor/settings' && req.method === 'POST') {
-        try {
-            let body = '';
-            req.on('data', chunk => {
-                body += chunk.toString();
-            });
 
-            req.on('end', () => {
-                try {
-                    const newSettings = JSON.parse(body);
-                    videoMonitor.updateSettings(newSettings);
 
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({
-                        success: true,
-                        message: 'Settings updated successfully',
-                        settings: videoMonitor.getSettings()
-                    }));
 
-                } catch (parseError) {
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'Invalid JSON: ' + parseError.message }));
-                }
-            });
-        } catch (error) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: error.message }));
-        }
-        return;
-    }
-
-    // Start monitoring
-    if (pathname === '/api/monitor/start' && req.method === 'POST') {
-        try {
-            videoMonitor.startMonitoring();
-
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
-                success: true,
-                message: 'Video monitoring started'
-            }));
-        } catch (error) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: error.message }));
-        }
-        return;
-    }
-
-    // Stop monitoring
-    if (pathname === '/api/monitor/stop' && req.method === 'POST') {
-        try {
-            videoMonitor.stopMonitoring();
-
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
-                success: true,
-                message: 'Video monitoring stopped'
-            }));
-        } catch (error) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: error.message }));
-        }
-        return;
-    }
-
-    // Update channel settings
-    if (pathname === '/api/channel/settings' && req.method === 'POST') {
-        try {
-            let body = '';
-            req.on('data', chunk => {
-                body += chunk.toString();
-            });
-
-            req.on('end', () => {
-                try {
-                    const { channelId, settings } = JSON.parse(body);
-
-                    if (!channelId) {
-                        res.writeHead(400, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify({ 
-                            success: false, 
-                            error: 'Channel ID is required' 
-                        }));
-                        return;
-                    }
-
-                    // Update channel settings in the video monitor
-                    const success = videoMonitor.updateChannelSettings(channelId, settings);
-
-                    if (success) {
-                        res.writeHead(200, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify({
-                            success: true,
-                            message: 'Channel settings updated successfully'
-                        }));
-                    } else {
-                        res.writeHead(404, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify({
-                            success: false,
-                            error: 'Channel not found'
-                        }));
-                    }
-                } catch (parseError) {
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ 
-                        success: false, 
-                        error: 'Invalid JSON data' 
-                    }));
-                }
-            });
-        } catch (error) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ 
-                success: false, 
-                error: error.message 
-            }));
-        }
-        return;
-    }
 
     // Serve static files
     let filePath = path.join(__dirname, pathname === '/' ? '/index.html' : pathname);
@@ -1258,9 +1239,5 @@ server.listen(PORT, () => {
     console.log(`YouTube Transcript Summarizer Server running at http://localhost:${PORT}`);
     console.log('Open your browser and navigate to the above URL to use the application.');
 
-    // Start video monitoring if there are favorite channels
-    if (videoMonitor.getFavoriteChannels().length > 0) {
-        console.log('Starting video monitoring for favorite channels...');
-        videoMonitor.startMonitoring();
-    }
+
 });

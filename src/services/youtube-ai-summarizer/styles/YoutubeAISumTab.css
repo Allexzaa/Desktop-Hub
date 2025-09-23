@@ -827,7 +827,7 @@
   background: var(--bg-card);
   border-radius: 10px;
   padding: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 0px;
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
   position: relative;
@@ -1062,13 +1062,17 @@
   /* Prevents flex item from overflowing */
 }
 
-/* Favorite Channels Box */
+/* Favorite Channels Box - ENLARGED for better video notifications */
 .favorite-channels-box {
-  width: 380px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  width: 450px;
+  /* Increased from 380px */
+  background: transparent;
+  /* TRANSPARENT: Seamless integration with main background */
+  border: 1px solid transparent;
+  /* Transparent border - maintains spacing */
   border-radius: 12px;
-  box-shadow: var(--shadow-md);
+  box-shadow: none;
+  /* REMOVED: Shadow for ultra-minimal, seamless look */
   height: fit-content;
   position: sticky;
   top: 24px;
@@ -1151,24 +1155,55 @@
   padding: 8px;
 }
 
-/* Channels List */
+/* Channels List - ENLARGED with vertical layout for better video notifications */
 .channels-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 16px;
   margin-top: 16px;
+  max-height: calc(4 * (120px + 16px));
+  /* Increased card height from 80px to 120px */
+  overflow-y: auto;
+  padding-right: 4px;
+  /* Space for scrollbar */
+}
+
+/* Custom scrollbar for channels list */
+.channels-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.channels-list::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+}
+
+.channels-list::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.channels-list::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 .channel-item {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px;
+  flex-direction: column;
+  /* Changed to column for more space */
+  padding: 16px;
+  /* Increased padding */
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 12px;
+  /* Slightly more rounded */
   transition: all 0.2s ease;
   cursor: pointer;
+  min-height: 120px;
+  /* Increased minimum height */
+  flex-shrink: 0;
+  /* Prevent cards from shrinking */
 }
 
 .channel-item:hover {
@@ -1180,15 +1215,20 @@
 
 .channel-info {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  /* Changed to flex-start for better layout */
   gap: 12px;
   flex: 1;
   min-width: 0;
+  margin-bottom: 12px;
+  /* Add space between channel info and videos */
 }
 
 .channel-thumbnail {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  /* Increased from 48px */
+  height: 56px;
+  /* Increased from 48px */
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--border-color);
@@ -5407,6 +5447,7 @@ ewly Added Channel Highlight */
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
 }
+
 /* =====
 ===================================
    FEATURE DOCUMENTATION
@@ -5439,3 +5480,392 @@ ewly Added Channel Highlight */
    - .channels-list-container: Scrollable container for channel cards
    
    ======================================== */
+/* =
+=======================================
+   ENLARGED CHANNEL CARDS & VIDEO NOTIFICATIONS
+   ======================================== */
+
+/* Channel header with name and controls */
+.channel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.channel-main-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.channel-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.channel-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.channel-subscribers {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Channel actions (remove button, expand button) */
+.channel-actions {
+  display: flex;
+  gap: 4px;
+  align-items: flex-start;
+  flex-shrink: 0;
+}
+
+.remove-channel-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.remove-channel-btn:hover {
+  background: var(--error-light);
+  color: var(--error-color);
+}
+
+/* Video notifications section - ENLARGED */
+.channel-videos {
+  width: 100%;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.videos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.videos-count {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.new-videos-badge {
+  background: var(--success-color);
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.expand-videos-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.expand-videos-btn:hover {
+  background: var(--accent-light);
+  color: var(--accent-color);
+}
+
+/* Video list - ENLARGED for better visibility */
+.videos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  /* Increased from smaller size */
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.video-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  /* REMOVED: No gap for seamless connection */
+  padding: 0;
+  /* REMOVED: No padding for seamless look */
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  /* INCREASED: More rounded for cohesive card look */
+  transition: all 0.2s ease;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  align-self: stretch;
+  overflow: hidden;
+  /* ADDED: Ensure clean edges */
+}
+
+.video-item:hover {
+  background: var(--accent-light);
+  border-color: var(--accent-color);
+  transform: translateY(-1px);
+}
+
+.video-thumbnail {
+  width: 100%;
+  height: 70px;
+  border-radius: 6px 6px 0 0;
+  /* CHANGED: Only round top corners for seamless connection */
+  flex-shrink: 0;
+  border: none;
+  /* REMOVED: No separate border, uses parent border */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  position: relative;
+  box-sizing: border-box;
+}
+
+.video-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbnail-placeholder {
+  font-size: 16px;
+  color: var(--text-muted);
+}
+
+.video-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  /* REDUCED: Tighter spacing */
+  padding: 8px;
+  /* ADDED: Padding inside the text area for breathing room */
+  background: var(--bg-card);
+  /* ADDED: Ensure consistent background */
+  border-radius: 0 0 6px 6px;
+  /* ADDED: Only round bottom corners */
+}
+
+.video-title {
+  font-size: 11px;
+  /* OPTIMIZED: Smaller but readable */
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  /* INCREASED: Allow 3 lines to show more title */
+  -webkit-box-orient: vertical;
+  word-wrap: break-word;
+  /* ADDED: Ensure long words break properly */
+  hyphens: auto;
+  /* ADDED: Better word breaking */
+}
+
+.video-published {
+  font-size: 9px;
+  /* REDUCED: Smaller to give more space to title */
+  color: var(--text-muted);
+  margin: 0;
+  font-weight: 500;
+  margin-top: auto;
+  /* ADDED: Push date to bottom of text area */
+}
+
+/* Custom scrollbar for video list */
+.videos-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.videos-list::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: 2px;
+}
+
+.videos-list::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+.videos-list::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Mobile responsiveness for enlarged cards */
+@media (max-width: 768px) {
+  .favorite-channels-box {
+    width: 100%;
+  }
+
+  .channels-list {
+    max-height: calc(3 * (100px + 16px));
+    /* Smaller on mobile */
+  }
+
+  .channel-item {
+    min-height: 100px;
+    padding: 12px;
+  }
+
+  .channel-thumbnail {
+    width: 48px;
+    height: 48px;
+  }
+
+  .videos-list {
+    max-height: 150px;
+  }
+
+  .video-thumbnail {
+    width: 50px;
+    height: 38px;
+  }
+}
+
+/* 
+NEW indicator for videos - positioned on thumbnail */
+.new-indicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: var(--success-color);
+  color: white;
+  font-size: 8px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Enhanced video item hover effect for vertical layout */
+.video-item:hover .video-thumbnail {
+  transform: scale(1.02);
+}
+
+.video-item:hover .video-title {
+  color: var(--accent-color);
+}
+
+/* Video grid layout - OPTIMIZED for perfect alignment */
+.videos-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  /* OPTIMIZED: Smaller min-width for better fit */
+  gap: 8px;
+  /* REDUCED: Tighter gaps for cleaner look */
+  max-height: 280px;
+  /* OPTIMIZED: Better height for content */
+  overflow-y: auto;
+  padding: 6px;
+  /* REDUCED: Less padding for more content space */
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+  /* REDUCED: Smaller radius for cleaner look */
+  border: 1px solid var(--border-color);
+  align-items: start;
+  /* ADDED: Align items to top for consistent layout */
+}
+
+/* A
+LIGNMENT FIXES for video grid */
+.videos-list .video-item {
+  margin: 0;
+  /* Remove any default margins */
+  height: auto;
+  /* Let content determine height */
+  min-height: 110px;
+  /* Consistent minimum height for alignment */
+}
+
+.videos-list .video-item:last-child {
+  margin-bottom: 0;
+  /* Remove bottom margin from last item */
+}
+
+/* Ensure consistent thumbnail aspect ratio */
+.video-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* Remove any inline spacing */
+}
+
+/* Video info styling handled above - removed duplicate */
+
+/* Perfect grid alignment */
+.videos-list {
+  justify-items: stretch;
+  /* Ensure all items stretch to fill grid cells */
+  align-content: start;
+  /* Align grid content to top */
+}
+
+/* Mobile optimization for video grid */
+@media (max-width: 768px) {
+  .videos-list {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    /* Smaller cards on mobile */
+    gap: 6px;
+    padding: 4px;
+  }
+
+  .video-item {
+    padding: 0;
+    /* CONSISTENT: No padding for seamless look */
+    gap: 0;
+    /* CONSISTENT: No gap for connected appearance */
+    min-height: 120px;
+    /* INCREASED: More space for 3-line titles */
+  }
+
+  .video-thumbnail {
+    height: 60px;
+  }
+
+  .video-info {
+    padding: 6px;
+    /* MOBILE: Smaller padding */
+  }
+
+  .video-title {
+    font-size: 10px;
+    /* MOBILE: Smaller text */
+    -webkit-line-clamp: 2;
+    /* MOBILE: Fewer lines on small screens */
+  }
+}

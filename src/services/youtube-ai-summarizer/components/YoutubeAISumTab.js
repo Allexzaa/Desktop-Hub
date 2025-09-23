@@ -59,7 +59,7 @@ const YoutubeAISumTab = () => {
         }
     });
 
-    // State for favorite channels box with video monitoring
+    // State for favorite channels box
     const [favoriteChannels, setFavoriteChannels] = useState({
         isVisible: true,
         channels: [],
@@ -75,12 +75,8 @@ const YoutubeAISumTab = () => {
         isNewChannelSetup: false, // Track if this is a new channel being set up
         newlyAddedChannelId: null, // Track the ID of the newly added channel for highlighting
 
-        // Global monitor settings (used as defaults for new channels)
-        monitorSettings: {
-            checkIntervalValue: 1,
-            checkIntervalUnit: 'hours', // FIXED: Now properly saves 'hours', 'days', 'weeks'
-            maxVideosPerChannel: 5
-        }
+        // Settings for video fetching
+        maxVideosPerChannel: 5
     });
 
     const apiClient = useRef(new YouTubeAIApiClient()).current;
@@ -457,7 +453,7 @@ const YoutubeAISumTab = () => {
 
     const handleExtractTranscript = async () => {
         if (!currentUrl.trim()) {
-            showStatus('Please enter a YouTube URL or type "demo"', 'error');
+            showStatus('Please enter a YouTube URL', 'error');
             return;
         }
 
@@ -509,7 +505,29 @@ const YoutubeAISumTab = () => {
             }
         } catch (error) {
             console.error('Transcript extraction error:', error);
-            showStatus(`Failed to extract transcript: ${error.message}`, 'error');
+
+            // Provide helpful error messages and suggestions
+            let errorMessage = error.message;
+            let suggestion = '';
+
+            if (error.message.includes('404') || error.message.includes('Not Found')) {
+                errorMessage = 'Transcript not available for this video.';
+                suggestion = ' Try using "demo" as the URL to test the system, or find a video with captions enabled.';
+            } else if (error.message.includes('Transcript is disabled')) {
+                errorMessage = 'Transcript is disabled for this video by the creator.';
+                suggestion = ' Try a different video that has captions enabled.';
+            } else if (error.message.includes('No transcript found')) {
+                errorMessage = 'No transcript found for this video.';
+                suggestion = ' The video may not have captions enabled.';
+            } else if (error.message.includes('Video unavailable')) {
+                errorMessage = 'Video is unavailable or private.';
+                suggestion = ' Please check the video URL and try again.';
+            } else if (error.message.includes('HTTP error! status: 404')) {
+                errorMessage = 'Transcript extraction failed.';
+                suggestion = ' This video may not have captions available.';
+            }
+
+            showStatus(`${errorMessage}${suggestion}`, 'error');
         } finally {
             setIsLoading(false);
             setTimeout(() => showProgress(0), 1000);
@@ -775,13 +793,7 @@ const YoutubeAISumTab = () => {
             await loadFavoriteChannels();
 
             // Start video monitoring for the new channel (delayed to allow backend setup)
-            setTimeout(async () => {
-                try {
-                    await checkForNewVideos();
-                } catch (error) {
-                    console.error('Error in immediate video check:', error);
-                }
-            }, 1000);
+
 
             // AUTO-OPEN SETTINGS FEATURE: Select new channel and open settings panel
             setFavoriteChannels(prev => {
@@ -835,80 +847,18 @@ const YoutubeAISumTab = () => {
      * @param {Object} backendSettings - Settings from backend API
      * @returns {Object} Clean settings for frontend use
      */
-    const convertBackendSettingsToFrontend = (backendSettings) => {
-        // If settings already have user-friendly format, remove internal checkIntervalMinutes
-        if (backendSettings.checkIntervalValue && backendSettings.checkIntervalUnit) {
-            const { checkIntervalMinutes, ...cleanSettings } = backendSettings;
-            return cleanSettings; // Hide checkIntervalMinutes from frontend
-        }
 
-        // Legacy support: Convert checkIntervalMinutes back to user-friendly format
-        if (backendSettings.checkIntervalMinutes) {
-            const minutes = backendSettings.checkIntervalMinutes;
-            const { checkIntervalMinutes, ...otherSettings } = backendSettings;
-
-            // Convert to the most appropriate time unit for user display
-            if (minutes >= 7 * 24 * 60 && minutes % (7 * 24 * 60) === 0) {
-                // Perfect weeks (10080 minutes = 1 week)
-                return {
-                    ...otherSettings,
-                    checkIntervalValue: minutes / (7 * 24 * 60),
-                    checkIntervalUnit: 'weeks'
-                };
-            } else if (minutes >= 24 * 60 && minutes % (24 * 60) === 0) {
-                // Perfect days (1440 minutes = 1 day)
-                return {
-                    ...otherSettings,
-                    checkIntervalValue: minutes / (24 * 60),
-                    checkIntervalUnit: 'days'
-                };
-            } else if (minutes >= 60 && minutes % 60 === 0) {
-                // Perfect hours (60 minutes = 1 hour)
-                return {
-                    ...otherSettings,
-                    checkIntervalValue: minutes / 60,
-                    checkIntervalUnit: 'hours'
-                };
-            } else {
-                // Fallback to hours with rounding for non-standard intervals
-                return {
-                    ...otherSettings,
-                    checkIntervalValue: Math.round(minutes / 60),
-                    checkIntervalUnit: 'hours'
-                };
-            }
-        }
-
-        // Return original settings if no conversion needed
-        return backendSettings;
-    };
 
     const loadFavoriteChannels = async () => {
         try {
             const data = await apiClient.getFavoriteChannels();
 
-            // Ensure each channel has its settings properly loaded and converted
-            const channelsWithSettings = (data.favorites || []).map(channel => {
-                if (channel.settings) {
-                    // Convert backend settings to frontend format if needed
-                    const convertedSettings = convertBackendSettingsToFrontend(channel.settings);
-                    return {
-                        ...channel,
-                        settings: convertedSettings
-                    };
-                }
-                return {
-                    ...channel,
-                    settings: null // Keep as null if no settings exist
-                };
-            });
-
             setFavoriteChannels(prev => ({
                 ...prev,
-                channels: channelsWithSettings,
+                channels: data.favorites || [],
                 recentVideos: data.recentVideos || {},
                 selectedChannel: prev.selectedChannel
-                    ? channelsWithSettings.find(ch => ch.id === prev.selectedChannel.id) || null
+                    ? (data.favorites || []).find(ch => ch.id === prev.selectedChannel.id) || null
                     : null
             }));
         } catch (error) {
@@ -942,40 +892,7 @@ const YoutubeAISumTab = () => {
         }
     };
 
-    const updateMonitorSettings = async (newSettings) => {
-        try {
-            // Convert the interval to minutes for the backend
-            const convertToMinutes = (value, unit) => {
-                switch (unit) {
-                    case 'hours': return value * 60;
-                    case 'days': return value * 24 * 60;
-                    case 'weeks': return value * 7 * 24 * 60;
-                    default: return value * 60; // default to hours
-                }
-            };
 
-            const backendSettings = {
-                checkIntervalMinutes: convertToMinutes(newSettings.checkIntervalValue, newSettings.checkIntervalUnit),
-                videoLookbackHours: 24, // Fixed to 24 hours since we removed this setting
-                maxVideosPerChannel: newSettings.maxVideosPerChannel,
-                // Store the user-friendly values for the frontend
-                checkIntervalValue: newSettings.checkIntervalValue,
-                checkIntervalUnit: newSettings.checkIntervalUnit
-            };
-
-            await apiClient.updateMonitorSettings(backendSettings);
-            setFavoriteChannels(prev => ({
-                ...prev,
-                monitorSettings: newSettings
-            }));
-
-            const intervalText = `${newSettings.checkIntervalValue} ${newSettings.checkIntervalUnit}`;
-            showStatus(`Global settings updated! Checking every ${intervalText}`, 'success');
-        } catch (error) {
-            console.error('Error updating settings:', error);
-            showStatus('Failed to update settings', 'error');
-        }
-    };
 
     /**
      * Initialize channel settings with sensible defaults
@@ -999,55 +916,7 @@ const YoutubeAISumTab = () => {
      * FIXED: Check Interval time units (hours/days/weeks) now save correctly.
      * The backend receives both user-friendly format and calculated minutes.
      */
-    const updateChannelSettings = async (channelId, newSettings) => {
-        try {
-            // Convert user-friendly time format to minutes for backend processing
-            const convertToMinutes = (value, unit) => {
-                switch (unit) {
-                    case 'hours': return value * 60;
-                    case 'days': return value * 24 * 60;
-                    case 'weeks': return value * 7 * 24 * 60;
-                    default: return value * 60; // Default to hours
-                }
-            };
 
-            // Prepare settings for backend: include both formats
-            const backendSettings = {
-                checkIntervalMinutes: convertToMinutes(newSettings.checkIntervalValue, newSettings.checkIntervalUnit),
-                videoLookbackHours: 24,
-                maxVideosPerChannel: newSettings.maxVideosPerChannel,
-                // IMPORTANT: Store user-friendly values so they persist correctly
-                checkIntervalValue: newSettings.checkIntervalValue,
-                checkIntervalUnit: newSettings.checkIntervalUnit
-            };
-
-            await apiClient.updateChannelSettings(channelId, backendSettings);
-
-            // Update the selected channel in local state
-            setFavoriteChannels(prev => {
-                const updatedChannels = prev.channels.map(ch =>
-                    ch.id === channelId
-                        ? { ...ch, settings: newSettings }
-                        : ch
-                );
-
-                return {
-                    ...prev,
-                    channels: updatedChannels,
-                    selectedChannel: prev.selectedChannel?.id === channelId
-                        ? updatedChannels.find(ch => ch.id === channelId) // Use the updated channel data
-                        : prev.selectedChannel
-                };
-            });
-
-            const channelName = favoriteChannels.channels.find(ch => ch.id === channelId)?.name || 'Channel';
-            const intervalText = `${newSettings.checkIntervalValue} ${newSettings.checkIntervalUnit}`;
-            showStatus(`${channelName} settings updated! Checking every ${intervalText}`, 'success');
-        } catch (error) {
-            console.error('Error updating channel settings:', error);
-            showStatus('Failed to update channel settings', 'error');
-        }
-    };
 
     const toggleChannelExpansion = (channelId) => {
         setFavoriteChannels(prev => {
@@ -1062,15 +931,47 @@ const YoutubeAISumTab = () => {
     };
 
     const handleVideoClick = (videoUrl) => {
-        setCurrentUrl(videoUrl);
-        showStatus('Video URL loaded from channel monitor', 'success');
+        // DUAL FUNCTIONALITY: Open in Chrome browser AND paste URL for transcript extraction
 
-        // Auto-extract transcript if service is connected
-        if (isServiceConnected) {
-            setTimeout(() => {
-                handleExtractTranscript();
-            }, 500);
+        // DEBUG: Log the video URL to understand the format
+        console.log('Video URL clicked:', videoUrl);
+
+        // 1. Open video in Chrome browser (external browser, not Electron)
+        if (window.require) {
+            // If running in Electron, use shell to open in default browser (Chrome)
+            const { shell } = window.require('electron');
+            shell.openExternal(videoUrl);
+        } else {
+            // Fallback for web version - opens in new tab
+            window.open(videoUrl, '_blank');
         }
+
+        // 2. Validate URL format before setting it
+        const videoId = apiClient.extractVideoId(videoUrl);
+        console.log('Extracted video ID:', videoId);
+
+        if (!videoId) {
+            showStatus('❌ Invalid video URL format. Cannot extract transcript.', 'error');
+            return;
+        }
+
+        // 3. Paste URL into the input box for transcript extraction
+        setCurrentUrl(videoUrl);
+
+        // 4. Show status message with URL validation
+        showStatus(`🎥 Video opened in Chrome! URL validated (ID: ${videoId.substring(0, 8)}...)`, 'success');
+
+        // 5. DISABLE auto-extract to prevent 404 errors - let user manually trigger
+        // if (isServiceConnected) {
+        //     setTimeout(() => {
+        //         handleExtractTranscript();
+        //     }, 1000);
+        // }
+
+        // Instead, show instruction to user
+        setTimeout(() => {
+            showStatus('💡 Click "Extract Transcript" button when ready to analyze this video', 'info');
+        }, 2000);
     };
 
     const getNewVideosCount = (channelId) => {
@@ -1854,7 +1755,7 @@ const YoutubeAISumTab = () => {
                                         id="youtube-url"
                                         value={currentUrl}
                                         onChange={(e) => setCurrentUrl(e.target.value)}
-                                        placeholder="Enter YouTube URL or try: 'demo', 'speech', 'tech-talk'"
+                                        placeholder="Enter YouTube URL"
                                         onKeyPress={(e) => e.key === 'Enter' && handleExtractTranscript()}
                                         disabled={isLoading}
                                     />
@@ -2085,97 +1986,22 @@ const YoutubeAISumTab = () => {
 
                                             <div className="settings-grid">
                                                 <div className="setting-item">
-                                                    <label>Check Interval:</label>
-                                                    <div className="interval-setting">
-                                                        <input
-                                                            type="number"
-                                                            min="1"
-                                                            max="52"
-                                                            value={
-                                                                favoriteChannels.selectedChannel?.settings?.checkIntervalValue ??
-                                                                favoriteChannels.monitorSettings.checkIntervalValue
-                                                            }
-                                                            onChange={(e) => {
-                                                                const newValue = parseInt(e.target.value);
-                                                                if (favoriteChannels.selectedChannel) {
-                                                                    // Update selected channel settings
-                                                                    const newSettings = {
-                                                                        ...favoriteChannels.selectedChannel.settings,
-                                                                        checkIntervalValue: newValue
-                                                                    };
-                                                                    updateChannelSettings(favoriteChannels.selectedChannel.id, newSettings);
-                                                                } else {
-                                                                    // Update global settings
-                                                                    const newSettings = {
-                                                                        ...favoriteChannels.monitorSettings,
-                                                                        checkIntervalValue: newValue
-                                                                    };
-                                                                    updateMonitorSettings(newSettings);
-                                                                }
-                                                            }}
-                                                            className="interval-value"
-                                                        />
-                                                        <select
-                                                            value={
-                                                                favoriteChannels.selectedChannel?.settings?.checkIntervalUnit ??
-                                                                favoriteChannels.monitorSettings.checkIntervalUnit
-                                                            }
-                                                            onChange={(e) => {
-                                                                const newUnit = e.target.value;
-                                                                if (favoriteChannels.selectedChannel) {
-                                                                    // Update selected channel settings
-                                                                    const newSettings = {
-                                                                        ...favoriteChannels.selectedChannel.settings,
-                                                                        checkIntervalUnit: newUnit
-                                                                    };
-                                                                    updateChannelSettings(favoriteChannels.selectedChannel.id, newSettings);
-                                                                } else {
-                                                                    // Update global settings
-                                                                    const newSettings = {
-                                                                        ...favoriteChannels.monitorSettings,
-                                                                        checkIntervalUnit: newUnit
-                                                                    };
-                                                                    updateMonitorSettings(newSettings);
-                                                                }
-                                                            }}
-                                                            className="interval-unit"
-                                                        >
-                                                            <option value="hours">Hours</option>
-                                                            <option value="days">Days</option>
-                                                            <option value="weeks">Weeks</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div className="setting-item">
                                                     <label>Max Videos per Channel:</label>
                                                     <input
                                                         type="number"
                                                         min="1"
                                                         max="20"
-                                                        value={
-                                                            favoriteChannels.selectedChannel?.settings?.maxVideosPerChannel ??
-                                                            favoriteChannels.monitorSettings.maxVideosPerChannel
-                                                        }
+                                                        value={favoriteChannels.maxVideosPerChannel}
                                                         onChange={(e) => {
                                                             const newValue = parseInt(e.target.value);
-                                                            if (favoriteChannels.selectedChannel) {
-                                                                // Update selected channel settings
-                                                                const newSettings = {
-                                                                    ...favoriteChannels.selectedChannel.settings,
-                                                                    maxVideosPerChannel: newValue
-                                                                };
-                                                                updateChannelSettings(favoriteChannels.selectedChannel.id, newSettings);
-                                                            } else {
-                                                                // Update global settings
-                                                                const newSettings = {
-                                                                    ...favoriteChannels.monitorSettings,
-                                                                    maxVideosPerChannel: newValue
-                                                                };
-                                                                updateMonitorSettings(newSettings);
-                                                            }
+                                                            setFavoriteChannels(prev => ({
+                                                                ...prev,
+                                                                maxVideosPerChannel: newValue
+                                                            }));
                                                         }}
                                                     />
                                                 </div>
+
                                             </div>
 
                                             {/* Complete Setup Button for New Channels */}

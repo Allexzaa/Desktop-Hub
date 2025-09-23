@@ -8,13 +8,13 @@ function App() {
       id: 1,
       title: 'Dashboard',
       component: 'Welcome',
-      icon: '🏠'
+      icon: './desktop-hub-icon.jpg'
     },
     {
       id: 2,
-      title: 'Youtube AI-Sum',
+      title: 'YouTube AI-Sum',
       component: 'YoutubeAISum',
-      icon: '🎬'
+      icon: './youtube-icon.png'
     }
   ]);
 
